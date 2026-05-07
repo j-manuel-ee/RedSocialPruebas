@@ -689,8 +689,8 @@
     document.getElementById('display-email').textContent  = s.email  || '';
 
     const bioEl = document.getElementById('display-bio');
-    if (s.bio) {
-      bioEl.textContent = s.bio;
+    if (s.descripcion) {
+      bioEl.textContent = s.descripcion;
       bioEl.classList.remove('empty');
     } else {
       bioEl.textContent = 'Sin biografía aún.';
@@ -707,7 +707,7 @@
     // Pre-llenar formulario de edición
     document.getElementById('edit-nombre').value = s.nombre || '';
     document.getElementById('edit-correo').value = s.email  || '';
-    document.getElementById('edit-bio').value    = s.bio    || '';
+    document.getElementById('edit-bio').value    = s.descripcion    || '';
   }
 
   poblarPerfil(sesion);
