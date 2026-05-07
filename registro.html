@@ -106,7 +106,13 @@ form.addEventListener("submit", async function(e) {
   const passwordVal = passwordEl.value;
   const fechaNacVal = fechaNacEl.value;
 
-  const dominiosPermitidos = ["@unam.mx", "@aragon.unam.mx", "@acatlan.unam.mx", "@cuautitlan.unam.mx", "@iztacala.unam.mx", "@zaragoza.unam.mx", "@ingenieria.unam.mx", "@cch.unam.mx", "@politicas.unam.mx", "@fca.unam.mx", "@derecho.unam.mx", "@economia.unam.mx", "@filos.unam.mx", "@facmed.unam.mx", "@quimica.unam.mx", "@psicologia.unam.mx", "@enp.unam.mx"];
+  const dominiosPermitidos = ["@unam.mx", "@arquitectura.unam.mx", "@fad.unam.mx", "@ciencias.unam.mx",
+    "@politicas.unam.mx", "@fca.unam.mx", "@derecho.unam.mx", "@economia.unam.mx",
+    "@filos.unam.mx", "@ingenieria.unam.mx", "@facmed.unam.mx", "@fmvz.unam.mx",
+    "@musica.unam.mx", "@odontologia.unam.mx", "@psicologia.unam.mx", "@quimica.unam.mx",
+    "@aragon.unam.mx", "@acatlan.unam.mx", "@cuautitlan.unam.mx", "@iztacala.unam.mx", 
+    "@zaragoza.unam.mx", "@enes.morelia.unam.mx", "@enes.leon.unam.mx", 
+    "@enes.juriquilla.unam.mx", "@cch.unam.mx", "@enp.unam.mx"];
   const cuentaRegex = /^\d{9}$/;
   const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
   const nombreRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/;
