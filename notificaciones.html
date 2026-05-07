@@ -3,82 +3,153 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Notificaciones - Red UNAM</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <title>Notificaciones — Red UNAM</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
   <style>
-    body { background-color: #121212; }
-    .nav-link#facultadNav { color: #ffc107 !important; font-weight: bold; }
-    .auth-vacia { visibility: hidden; }
+    :root {
+      --bg: #0a0c10;
+      --surface: #111318;
+      --surface2: #181c24;
+      --border: rgba(255,255,255,0.07);
+      --accent: #002f6c;
+      --gold: #c8a951;
+      --text: #e8eaf0;
+      --muted: #6b7280;
+      --radius: 14px;
+    }
+
+    body {
+      font-family: 'Sora', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      background-image: radial-gradient(circle at top right, rgba(0,47,108,0.1), transparent 40%);
+      min-height: 100vh;
+    }
+
+    /* --- NAV --- */
+    .nav-custom {
+      background: rgba(10,12,16,0.85);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; z-index: 1000;
+    }
+
+    .logo-mark {
+      width: 32px; height: 32px;
+      background: var(--gold);
+      color: #000; border-radius: 8px;
+      display: grid; place-items: center;
+      font-weight: bold; text-decoration: none;
+    }
+
+    /* --- CARDS --- */
+    .custom-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+    }
+
+    .notif-item {
+      background: var(--surface2);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+      border: 1px solid transparent;
+      transition: 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .notif-item:hover {
+      border-color: var(--gold);
+      transform: translateX(5px);
+    }
+
+    .notif-unread {
+      border-left: 4px solid var(--gold);
+      background: rgba(200, 169, 81, 0.05);
+    }
+
+    .icon-circle {
+      width: 45px; height: 45px;
+      border-radius: 50%;
+      background: var(--accent);
+      display: grid; place-items: center;
+      color: var(--gold);
+      flex-shrink: 0;
+    }
+
+    /* --- SEARCH --- */
+    .search-bar {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 5px 15px;
+      max-width: 300px;
+    }
+
     .search-results {
-      position: absolute; top: 100%; left: 0; right: 0;
-      background: #252525; z-index: 1050; border-radius: 0 0 10px 10px;
-      max-height: 250px; overflow-y: auto; border: 1px solid #333;
+      position: absolute; top: 110%; left: 0; right: 0;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      z-index: 1050;
     }
-    .card-notif { 
-        border-radius: 12px; 
-        background-color: #1e1e1e; 
-        transition: 0.3s; 
-        border: 1px solid #333;
-        cursor: pointer;
-    }
-    .card-notif.no-leida { 
-        border-left: 4px solid #0d6efd; 
-        background-color: #252525;
-    }
-    .card-notif:hover { background-color: #2a2a2a; }
   </style>
 </head>
 <body>
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow sticky-top">
-  <div class="container-fluid">
-    <a class="navbar-brand d-flex align-items-center" href="inicioRed.html">
-      <img src="images/logoUNAM.png" width="40" class="me-2">
-      <strong class="d-none d-sm-block">Red UNAM</strong>
+<nav class="nav-custom py-2 mb-4">
+  <div class="container d-flex justify-content-between align-items-center">
+    <a href="inicioRed.html" class="d-flex align-items-center gap-2 text-decoration-none">
+      <div class="logo-mark">U</div>
+      <span class="fw-bold text-white small d-none d-sm-inline" style="letter-spacing: 1px;">RED UNAM</span>
     </a>
 
-    <div class="flex-grow-1 mx-3 position-relative" style="max-width: 400px;">
-      <div class="input-group input-group-sm">
-        <span class="input-group-text bg-dark border-0 text-white"><i class="bi bi-search"></i></span>
-        <input type="text" id="inputBusqueda" class="form-control bg-dark border-0 text-white" placeholder="Buscar en la UNAM...">
+    <div class="position-relative d-none d-md-block">
+      <div class="search-bar d-flex align-items-center">
+        <i class="bi bi-search text-muted me-2 small"></i>
+        <input type="text" id="inputBusqueda" class="form-control bg-transparent border-0 text-white p-0 shadow-none small" placeholder="Buscar en la red...">
       </div>
-      <div id="resultadosBusqueda" class="search-results shadow"></div>
+      <div id="resultadosBusqueda" class="search-results shadow-lg"></div>
     </div>
 
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    
-    <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav me-auto align-items-center">
-        <li class="nav-item"><a class="nav-link" href="inicioRed.html">Inicio</a></li>
-        <li class="nav-item"><a class="nav-link" href="amigos.html"><i class="bi bi-people-fill"></i></a></li>
-        <li class="nav-item">
-          <a class="nav-link active position-relative" href="notificaciones.html">
-            <i class="bi bi-bell-fill"></i>
-            <span id="badge-notificaciones" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none">0</span>
-          </a>
-        </li>
-        <li class="nav-item"><a class="nav-link auth-vacia" href="facultad.html" id="facultadNav"></a></li>
-      </ul>
-      <div id="authArea" class="auth-vacia"></div>
-    </div>
+    <div id="authArea"></div>
   </div>
 </nav>
 
-<div class="container mt-4" style="max-width: 750px;">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h4 class="mb-0 text-white fw-bold"><i class="bi bi-bell me-2"></i>Notificaciones</h4>
-    <button id="btnMarcarTodo" class="btn btn-outline-secondary btn-sm rounded-pill">
-        Marcar todas como leídas
-    </button>
-  </div>
+<main class="container">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="d-flex justify-content-between align-items-end mb-4">
+        <div>
+          <h2 class="fw-bold mb-0" style="font-family: 'DM Serif Display', serif;">Notificaciones</h2>
+          <p class="text-muted small mb-0">Mantente al tanto de lo que pasa en tu comunidad</p>
+        </div>
+        <button id="btnMarcarTodo" class="btn btn-sm btn-outline-warning rounded-pill px-3" style="font-size: 11px; font-weight: 600;">
+          MARCAR TODO COMO LEÍDO
+        </button>
+      </div>
 
-  <div id="contenedorNotificaciones">
-    <div class="text-center p-5"><div class="spinner-border text-primary"></div></div>
+      <div class="custom-card">
+        <div id="listaNotificacionesFull">
+          <div class="text-center py-5">
+            <div class="spinner-border text-warning spinner-border-sm"></div>
+            <p class="small text-muted mt-2">Sincronizando actividad...</p>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
-</div>
+</main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/conexion.js"></script>
@@ -87,121 +158,95 @@
 <script>
   (function() {
     const sesion = JSON.parse(localStorage.getItem("sesion"));
+    if (!sesion) { window.location.replace("index.html"); return; }
 
-    // --- 🛠 LÓGICA DE INSTITUCIÓN ---
-    function obtenerInstitucion(email) {
-        if (!email) return "Comunidad UNAM";
-        if (email.endsWith('@aragon.unam.mx')) return "FES Aragón";
-        if (email.endsWith('@ingenieria.unam.mx')) return "Facultad de Ingeniería";
-        if (email.endsWith('@comunidad.unam.mx')) return "UNAM Central";
-        return "Comunidad UNAM";
+    async function init() {
+        renderNavbar();
+        cargarNotificacionesFull();
+        setupSearch();
     }
 
-    window.irANotificacion = async (id, postId, emisorId) => {
-        await window.supabaseClient.from('notificaciones').update({ leida: true }).eq('id', id);
-        if (postId && postId !== "null" && postId !== "") {
-            window.location.href = `inicioRed.html?post=${postId}`;
-        } else if (emisorId && emisorId !== "null") {
-            window.location.href = `perfil.html?id=${emisorId}`;
-        } else {
-            window.location.href = `inicioRed.html`;
-        }
-    };
+    function renderNavbar() {
+        const avatar = sesion.foto_perfil || `https://ui-avatars.com/api/?name=${encodeURIComponent(sesion.nombre)}&background=c8a951&color=000&bold=true`;
+        document.getElementById("authArea").innerHTML = `
+            <div class="dropdown">
+                <div class="d-flex align-items-center gap-2 cursor-pointer" data-bs-toggle="dropdown">
+                    <img src="${avatar}" class="rounded-circle border border-secondary" width="32" height="32">
+                    <i class="bi bi-chevron-down small text-muted"></i>
+                </div>
+                <ul class="dropdown-menu dropdown-menu-end shadow-lg mt-2" style="background: var(--surface2); border: 1px solid var(--border);">
+                    <li><a class="dropdown-item small" href="perfil.html">Mi Perfil</a></li>
+                    <li><a class="dropdown-item small" href="inicioRed.html">Inicio</a></li>
+                    <li><hr class="dropdown-divider opacity-10"></li>
+                    <li><button class="dropdown-item small text-danger" onclick="logout()">Cerrar Sesión</button></li>
+                </ul>
+            </div>`;
+    }
 
     async function cargarNotificacionesFull() {
-        const contenedor = document.getElementById("contenedorNotificaciones");
-        const badgeNav = document.getElementById("badge-notificaciones");
-        
-        const { data: notifs, error } = await window.supabaseClient
+        const { data, error } = await window.supabaseClient
             .from('notificaciones')
             .select('*')
             .eq('usuario_id', sesion.id)
             .order('creado_a_las', { ascending: false });
 
-        if (error) return;
-
-        const noLeidas = notifs?.filter(n => !n.leida).length || 0;
-        badgeNav.innerText = noLeidas;
-        noLeidas > 0 ? badgeNav.classList.remove("d-none") : badgeNav.classList.add("d-none");
-
-        if (!notifs || notifs.length === 0) {
-            contenedor.innerHTML = '<div class="card card-notif p-5 text-center text-muted">No hay actividad nueva.</div>';
+        const contenedor = document.getElementById("listaNotificacionesFull");
+        
+        if (error || !data.length) {
+            contenedor.innerHTML = `<div class="text-center py-5 text-muted small">No tienes notificaciones nuevas.</div>`;
             return;
         }
 
-        contenedor.innerHTML = notifs.map(n => {
-            const avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(n.emisor_nombre)}&background=random`;
+        contenedor.innerHTML = data.map(n => {
+            let icono = 'bi-bell';
+            if(n.tipo.includes('like')) icono = 'bi-heart-fill text-danger';
+            if(n.tipo.includes('comento')) icono = 'bi-chat-dots-fill text-info';
+            if(n.tipo.includes('amigo')) icono = 'bi-person-plus-fill text-warning';
+
             return `
-                <div class="card card-notif mb-3 p-3 ${n.leida ? '' : 'no-leida'}" 
-                     onclick="irANotificacion('${n.id}', '${n.post_id || ''}', '${n.emisor_id || ''}')">
-                    <div class="d-flex align-items-center">
-                        <img src="${avatar}" class="rounded-circle me-3" width="50">
-                        <div class="flex-grow-1">
-                            <p class="mb-0 text-white">
-                                <span class="fw-bold">${n.emisor_nombre}</span> ${n.tipo}
-                            </p>
-                            <small class="text-muted" style="font-size: 0.75rem;">${new Date(n.creado_a_las).toLocaleString()}</small>
-                        </div>
-                        ${!n.leida ? '<span class="badge bg-primary rounded-pill">Nueva</span>' : ''}
+                <div class="notif-item ${n.leida ? '' : 'notif-unread'}">
+                    <div class="icon-circle">
+                        <i class="bi ${icono}"></i>
                     </div>
-                </div>`;
+                    <div class="flex-grow-1">
+                        <div class="small mb-1">
+                            <span class="fw-bold text-white">${n.emisor_nombre}</span> 
+                            <span class="text-muted">${n.tipo}</span>
+                        </div>
+                        <div style="font-size: 10px;" class="text-uppercase text-gold opacity-75 fw-bold">
+                            ${new Date(n.creado_a_las).toLocaleDateString()} • ${new Date(n.creado_a_las).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                        </div>
+                    </div>
+                    ${!n.leida ? `<div class="bg-warning rounded-circle" style="width: 8px; height: 8px;"></div>` : ''}
+                </div>
+            `;
         }).join('');
     }
 
-    function configurarInterfaz() {
-      if (!sesion) { window.location.replace("index.html"); return; }
-      
-      const miInst = obtenerInstitucion(sesion.email);
-      const avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(sesion.nombre)}&background=0D6EFD&color=fff`;
-      
-      // Botón Facultad Nav
-      const fNav = document.getElementById("facultadNav");
-      fNav.innerHTML = `🎓 ${miInst}`;
-      fNav.classList.remove("auth-vacia");
-
-      // Dropdown de Usuario con Institución
-      const authArea = document.getElementById("authArea");
-      authArea.innerHTML = `
-        <div class="dropdown">
-          <button class="btn btn-light btn-sm dropdown-toggle fw-bold" data-bs-toggle="dropdown">
-            ${sesion.nombre.split(' ')[0]}
-          </button>
-          <ul class="dropdown-menu dropdown-menu-end shadow p-3">
-            <li class="text-center mb-2">
-              <img src="${avatar}" class="rounded-circle mb-2" width="55">
-              <div class="fw-bold text-primary small">${sesion.nombre}</div>
-              <div class="text-muted" style="font-size: 0.7rem;">${miInst}</div>
-            </li>
-            <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item text-center fw-bold border rounded mb-2" href="perfil.html">Ver Perfil</a></li>
-            <li><button class="dropdown-item text-danger text-center fw-bold" id="logoutBtn">Cerrar sesión</button></li>
-          </ul>
-        </div>`;
-      authArea.classList.remove("auth-vacia");
-
-      document.getElementById("logoutBtn").onclick = () => {
-        localStorage.removeItem("sesion");
-        window.location.replace("index.html");
-      };
-
-      cargarNotificacionesFull();
-    }
-
-    // Buscador
-    document.getElementById('inputBusqueda').addEventListener('input', async (e) => {
-        const q = e.target.value.trim();
-        const res = document.getElementById('resultadosBusqueda');
-        if (q.length < 2) { res.innerHTML = ""; return; }
-        const { data } = await window.supabaseClient.from('usuarios').select('id, nombre').ilike('nombre', `%${q}%`).limit(5);
-        res.innerHTML = data.map(u => `<div class="p-2 border-bottom border-secondary text-white small cursor-pointer" onclick="location.href='perfil.html?id=${u.id}'">${u.nombre}</div>`).join('');
-    });
-
     document.getElementById("btnMarcarTodo").onclick = async () => {
-        await window.supabaseClient.from('notificaciones').update({ leida: true }).eq('usuario_id', sesion.id);
+        await window.supabaseClient
+            .from('notificaciones')
+            .update({ leida: true })
+            .eq('usuario_id', sesion.id);
         cargarNotificacionesFull();
     };
 
-    configurarInterfaz();
+    function setupSearch() {
+        document.getElementById('inputBusqueda').oninput = async (e) => {
+            const q = e.target.value.trim();
+            const res = document.getElementById('resultadosBusqueda');
+            if (q.length < 2) { res.innerHTML = ""; return; }
+            const { data } = await window.supabaseClient.from('usuarios').select('id, nombre').ilike('nombre', `%${q}%`).limit(5);
+            res.innerHTML = data.map(u => `<div class="p-2 border-bottom border-secondary text-white small cursor-pointer" onclick="location.href='perfil.html?id=${u.id}'">${u.nombre}</div>`).join('');
+        };
+    }
+
+    window.logout = () => {
+        localStorage.removeItem("sesion");
+        window.location.replace("index.html");
+    };
+
+    init();
   })();
 </script>
 </body>
