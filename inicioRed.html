@@ -111,6 +111,99 @@
     .comment-box { background: var(--surface2); border-radius: 8px; padding: 10px; margin-top: 10px; }
   </style>
 </head>
+  <!-- MODAL EDITAR POST -->
+<div
+class="modal fade"
+id="editPostModal"
+tabindex="-1"
+>
+
+<div class="modal-dialog modal-dialog-centered">
+
+<div
+class="modal-content"
+style="
+background: var(--surface);
+border:1px solid var(--border);
+border-radius:18px;
+"
+>
+
+<div class="modal-header border-secondary">
+
+<h5 class="modal-title text-white">
+Editar publicación
+</h5>
+
+<button
+type="button"
+class="btn-close btn-close-white"
+data-bs-dismiss="modal"
+></button>
+
+</div>
+
+<div class="modal-body">
+
+<textarea
+id="editPostText"
+class="form-control bg-dark border-0 text-white mb-3"
+rows="4"
+style="resize:none;border-radius:12px;"
+></textarea>
+
+<div id="editPreview"></div>
+
+<input
+type="file"
+id="editFile"
+hidden
+accept="image/*,video/*"
+>
+
+<div class="d-flex gap-2 mt-3">
+
+<label
+for="editFile"
+class="btn btn-outline-light btn-sm"
+>
+Cambiar archivo
+</label>
+
+<button
+id="btnRemoveCurrentMedia"
+class="btn btn-outline-danger btn-sm"
+>
+Quitar archivo
+</button>
+
+</div>
+
+</div>
+
+<div class="modal-footer border-secondary">
+
+<button
+class="btn btn-secondary"
+data-bs-dismiss="modal"
+>
+Cancelar
+</button>
+
+<button
+id="btnSaveEdit"
+class="btn btn-warning fw-bold"
+>
+Guardar cambios
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
 <body>
 
 <header class="header-main">
@@ -655,6 +748,12 @@ feed.appendChild(div);
 // EDITAR POST
 // ─────────────────────────────────────────────────────────────
 
+let editingPost = null;
+
+let nuevaImagenEditar = null;
+
+let eliminarMediaActual = false;
+
 window.editarPost = async (postId) => {
 
 const { data: post } =
@@ -666,52 +765,119 @@ await window.supabaseClient
 
 if (!post) return;
 
-const nuevoTexto =
-prompt("Editar publicación:", post.contenido_texto);
+editingPost = post;
 
-if (nuevoTexto === null) return;
+nuevaImagenEditar = null;
 
-let nuevaImagen = null;
+eliminarMediaActual = false;
 
-let eliminarImagen = false;
+document.getElementById("editPostText").value =
+post.contenido_texto || "";
 
-const seleccionarNuevo =
-confirm("¿Deseas cambiar imagen/video?");
+renderEditPreview(post.archivo_url, post.tipo_archivo);
 
-if (seleccionarNuevo) {
-
-const input = document.createElement("input");
-
-input.type = "file";
-
-input.accept = "image/*,video/*";
-
-input.onchange = async () => {
-
-nuevaImagen = input.files[0];
-
-const eliminarVieja = confirm(
-"¿Eliminar archivo anterior?"
+const modal =
+new bootstrap.Modal(
+document.getElementById("editPostModal")
 );
 
-if (eliminarVieja) {
+modal.show();
 
-eliminarImagen = true;
+};
+  function renderEditPreview(url, tipo) {
 
+const preview =
+document.getElementById("editPreview");
+
+if (!url) {
+
+preview.innerHTML = `
+<div class="text-muted small text-center py-4">
+Sin archivo
+</div>
+`;
+
+return;
 }
 
-const confirmar =
-confirm("¿Guardar cambios?");
+if (tipo?.startsWith("video")) {
 
-if (!confirmar) return;
+preview.innerHTML = `
+<video
+src="${url}"
+controls
+class="post-media"
+style="
+max-height:400px;
+object-fit:contain;
+background:black;
+"
+></video>
+`;
 
-let archivo_url = post.archivo_url;
+} else {
 
-let tipo_archivo = post.tipo_archivo;
+preview.innerHTML = `
+<img
+src="${url}"
+class="post-media"
+style="
+max-height:400px;
+object-fit:contain;
+background:black;
+"
+>
+`;
+}
 
-// eliminar anterior
+}
+  document.getElementById("editFile")
+.addEventListener("change", (e) => {
 
-if (eliminarImagen && archivo_url) {
+const file = e.target.files[0];
+
+if (!file) return;
+
+nuevaImagenEditar = file;
+
+const url = URL.createObjectURL(file);
+
+renderEditPreview(url, file.type);
+
+});
+  document.getElementById("btnRemoveCurrentMedia")
+.onclick = () => {
+
+eliminarMediaActual = true;
+
+nuevaImagenEditar = null;
+
+document.getElementById("editFile").value = "";
+
+renderEditPreview(null, null);
+
+};
+  document.getElementById("btnSaveEdit")
+.onclick = async () => {
+
+if (!editingPost) return;
+
+const btn =
+document.getElementById("btnSaveEdit");
+
+btn.disabled = true;
+
+btn.innerText = "Guardando...";
+
+try {
+
+let archivo_url = editingPost.archivo_url;
+
+let tipo_archivo = editingPost.tipo_archivo;
+
+// eliminar media anterior
+
+if (eliminarMediaActual && archivo_url) {
 
 const path =
 archivo_url.split(`/storage/v1/object/public/${BUCKET}/`)[1];
@@ -721,6 +887,7 @@ if (path) {
 await window.supabaseClient.storage
 .from(BUCKET)
 .remove([path]);
+
 }
 
 archivo_url = null;
@@ -730,65 +897,63 @@ tipo_archivo = null;
 
 // subir nueva
 
-if (nuevaImagen) {
+if (nuevaImagenEditar) {
 
 const path =
-`posts/${Date.now()}_${nuevaImagen.name}`;
+`posts/${Date.now()}_${nuevaImagenEditar.name}`;
 
 await window.supabaseClient.storage
 .from(BUCKET)
-.upload(path, nuevaImagen);
+.upload(path, nuevaImagenEditar);
 
 archivo_url =
 window.supabaseClient.storage
 .from(BUCKET)
 .getPublicUrl(path).data.publicUrl;
 
-tipo_archivo = nuevaImagen.type;
+tipo_archivo =
+nuevaImagenEditar.type;
 }
 
 await window.supabaseClient
 .from("publicaciones")
 .update({
 
-contenido_texto: nuevoTexto,
+contenido_texto:
+document.getElementById("editPostText").value,
 
 archivo_url,
 
 tipo_archivo
 
 })
-.eq("id", postId)
+.eq("id", editingPost.id)
 .eq("autor_id", sesion.id);
+
+bootstrap.Modal
+.getInstance(
+document.getElementById("editPostModal")
+)
+.hide();
+
+editingPost = null;
 
 await cargarPublicaciones();
 
-};
+} catch(err) {
 
-input.click();
+alert(err.message);
 
-} else {
+} finally {
 
-const confirmar =
-confirm("¿Guardar cambios?");
+btn.disabled = false;
 
-if (!confirmar) return;
-
-await window.supabaseClient
-.from("publicaciones")
-.update({
-
-contenido_texto: nuevoTexto
-
-})
-.eq("id", postId)
-.eq("autor_id", sesion.id);
-
-await cargarPublicaciones();
+btn.innerText = "Guardar cambios";
 
 }
 
 };
+  
 
 // ─────────────────────────────────────────────────────────────
 // ELIMINAR
