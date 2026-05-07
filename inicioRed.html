@@ -308,23 +308,69 @@ Guardar cambios
 
 (function() {
 
-const sesion = JSON.parse(localStorage.getItem("sesion"));
-const BUCKET = 'publicaciones-media';
+const sesionData = localStorage.getItem('sesion');
 
-function validarSesion() {
+const sessionId = localStorage.getItem('session_id');
 
-const sesionGuardada = localStorage.getItem("sesion");
+if (!sesionData || !sessionId) {
 
-if (!sesionGuardada) {
-window.location.replace("index.html");
+cerrarSesionLocal();
+
+throw new Error("Sin sesión");
+
+}
+
+const sesion = JSON.parse(sesionData);
+
+async function validarSesionActiva() {
+
+try {
+
+const { data, error } = await window.supabaseClient
+.from('usuarios')
+.select('sesiones_activas')
+.eq('id', sesion.id)
+.single();
+
+if (error) throw error;
+
+const sesiones = data?.sesiones_activas || [];
+
+const sigueActiva = sesiones.some(
+s => s.session_id === sessionId
+);
+
+if (!sigueActiva) {
+
+cerrarSesionLocal();
+
 return false;
+
 }
 
 return true;
+
+} catch {
+
+cerrarSesionLocal();
+
+return false;
+
 }
 
-if (!validarSesion()) return;
+}
 
+function cerrarSesionLocal() {
+
+localStorage.removeItem("sesion");
+
+localStorage.removeItem("session_id");
+
+window.location.replace("index.html");
+
+}
+
+await validarSesionActiva();
 // ─────────────────────────────────────────────────────────────
 // UTILIDADES
 // ─────────────────────────────────────────────────────────────
