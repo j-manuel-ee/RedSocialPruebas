@@ -216,14 +216,22 @@ form.addEventListener("submit", async function(e) {
     if (perfilError) throw perfilError;
 
     // ── Registrar esta sesión en sesiones_activas ─────────────────────────
-    const nuevaSesion = {
-      dispositivo: detectarDispositivo(),
-      navegador:   detectarNavegador(),
-      plataforma:  navigator.platform || '—',
-      fecha:       new Date().toISOString(),
-      // Usamos los últimos 8 chars del token como identificador ligero
-      token_ref:   authData.session?.access_token?.slice(-8) || Math.random().toString(36).slice(2,10)
-    };
+const sessionId = crypto.randomUUID();
+
+const nuevaSesion = {
+
+session_id: sessionId,
+
+dispositivo: detectarDispositivo(),
+
+navegador: detectarNavegador(),
+
+plataforma: navigator.platform || '—',
+
+fecha: new Date().toISOString()
+
+};
+    localStorage.setItem("session_id", sessionId);
 
     // Agregar al inicio del array, conservar máximo 5 sesiones
     const sesionesActuales = Array.isArray(perfil.sesiones_activas) ? perfil.sesiones_activas : [];
