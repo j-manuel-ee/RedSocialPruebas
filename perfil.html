@@ -831,7 +831,10 @@ await validarSesionActiva();
         }];
       } else {
         // Marcar cuál es la actual (la más reciente o la que coincide con el token guardado)
-        sesiones = sesiones.map((s, i) => ({ ...s, actual: i === 0 }));
+sesiones = sesiones.map(s => ({
+...s,
+actual: s.session_id === sessionId
+}));
       }
 
       renderSesiones(sesiones);
@@ -877,7 +880,7 @@ await validarSesionActiva();
       const fecha = s.fecha
         ? new Date(s.fecha).toLocaleString('es-MX', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' })
         : '—';
-      const esActual = s.actual || idx === 0;
+      const esActual = s.actual;
       const icono    = iconoDispositivo(s);
       const nav      = iconoNavegador(s);
       const plat     = s.plataforma ? ` · ${s.plataforma}` : '';
