@@ -3,608 +3,391 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Red UNAM</title>
+  <title>Red UNAM - Comunidad Universitaria</title>
+  
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
   <style>
-    /* ── TOKENS ── */
     :root {
-      --bg:        #0a0c10;
-      --surface:   #111318;
-      --surface2:  #181c24;
-      --border:    rgba(255,255,255,0.07);
-      --accent:    #002f6c;   /* Azul UNAM */
-      --gold:      #c8a951;   /* Oro UNAM */
-      --gold-glow: rgba(200,169,81,0.18);
-      --text:      #e8eaf0;
-      --muted:     #6b7280;
-      --danger:    #e05252;
-      --radius:    14px;
-      --card-shadow: 0 2px 24px rgba(0,0,0,0.45);
+      --bg: #0a0c10;
+      --surface: #111318;
+      --surface2: #181c24;
+      --border: rgba(255,255,255,0.07);
+      --accent: #002f6c;
+      --gold: #c8a951;
+      --text: #e8eaf0;
+      --muted: #6b7280;
+      --danger: #e05252;
+      --radius: 14px;
     }
-
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    html { scroll-behavior: smooth; }
-
-    body {
-      font-family: 'Sora', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      background-image:
-        radial-gradient(ellipse 80% 60% at 50% -10%, rgba(0,47,108,0.35) 0%, transparent 70%);
-    }
-
-    /* ── HEADER ── */
-    .header-main {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      background: rgba(10,12,16,0.85);
-      backdrop-filter: blur(16px);
-      border-bottom: 1px solid var(--border);
-    }
-
-    .top-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 12px 28px;
-      gap: 16px;
-    }
-
-    /* Logo */
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      text-decoration: none;
-    }
-    .logo-mark {
-      width: 34px; height: 34px;
-      background: linear-gradient(135deg, var(--accent), #0047ab);
-      border-radius: 8px;
-      display: grid; place-items: center;
-      font-family: 'DM Serif Display', serif;
-      font-size: 16px; color: var(--gold);
-      box-shadow: 0 0 18px rgba(0,47,108,0.6);
-    }
-    .logo-text {
-      font-size: 15px; font-weight: 700; letter-spacing: 0.04em;
-      background: linear-gradient(90deg, #fff 60%, var(--gold));
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    }
-
-    /* Buscador */
-    .search-container {
-      display: flex; align-items: center;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 999px;
-      padding: 6px 14px;
-      gap: 8px;
-      flex: 1; max-width: 320px;
-      transition: border-color .2s;
-    }
+    body { font-family: 'Sora', sans-serif; background: var(--bg); color: var(--text); background-image: radial-gradient(ellipse 80% 60% at 50% -10%, rgba(0,47,108,0.35) 0%, transparent 70%); min-height: 100vh; }
+    
+    .header-main { position: sticky; top: 0; z-index: 1050; background: rgba(10,12,16,0.85); backdrop-filter: blur(16px); border-bottom: 1px solid var(--border); }
+    .logo-mark { width: 34px; height: 34px; background: linear-gradient(135deg, var(--accent), #0047ab); border-radius: 8px; display: grid; place-items: center; font-family: 'DM Serif Display', serif; color: var(--gold); box-shadow: 0 0 18px rgba(0,47,108,0.6); text-decoration: none; }
+    .search-container { background: var(--surface2); border: 1px solid var(--border); border-radius: 999px; padding: 6px 14px; max-width: 320px; transition: 0.2s; }
     .search-container:focus-within { border-color: var(--gold); }
-    .search-input {
-      background: none; border: none; outline: none;
-      color: var(--text); font-family: inherit;
-      font-size: 13px; width: 100%;
-    }
-    .search-input::placeholder { color: var(--muted); }
-    .search-btn {
-      background: none; border: none; cursor: pointer;
-      color: var(--muted); font-size: 14px;
-      transition: color .2s;
-    }
-    .search-btn:hover { color: var(--gold); }
-
-    /* Perfil */
-    .perfil-info {
-      display: flex; align-items: center; gap: 10px; cursor: pointer;
-    }
-    .username { font-size: 13px; font-weight: 600; color: var(--text); }
-    .profile-pic {
-      width: 36px; height: 36px; border-radius: 50%;
-      background: linear-gradient(135deg, var(--accent) 0%, var(--gold) 100%);
-      border: 2px solid var(--gold);
-      flex-shrink: 0;
-    }
-    .profile-pic.official-pic {
-      background: linear-gradient(135deg, #002f6c, #0047ab);
-    }
-
-    /* Navbar */
-    .navbar {
-      border-top: 1px solid var(--border);
-      padding: 0 28px;
-    }
-    .nav-links {
-      list-style: none;
-      display: flex; gap: 4px;
-    }
-    .nav-links li a {
-      display: block;
-      padding: 10px 16px;
-      text-decoration: none;
-      font-size: 13px; font-weight: 600;
-      color: var(--muted);
-      border-bottom: 2px solid transparent;
-      transition: color .2s, border-color .2s;
-      letter-spacing: 0.02em;
-    }
-    .nav-links li a:hover,
-    .nav-links li a.active {
-      color: var(--gold);
-      border-bottom-color: var(--gold);
-    }
-
-    /* ── LAYOUT ── */
-    .feed-container {
-      max-width: 640px;
-      margin: 0 auto;
-      padding: 28px 16px 80px;
-      display: flex; flex-direction: column; gap: 0;
-    }
-
-    /* ── CARD BASE ── */
-    .login-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 20px;
-      margin-bottom: 16px;
-      box-shadow: var(--card-shadow);
-      transition: border-color .2s;
-      animation: fadeUp .4s ease both;
-    }
-    .login-card:hover { border-color: rgba(200,169,81,0.2); }
-
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(12px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    /* ── CREAR POST ── */
-    .create-card-title {
-      font-family: 'DM Serif Display', serif;
-      font-size: 17px;
-      color: var(--text);
-      margin-bottom: 14px;
-    }
-    .create-card-title span { color: var(--gold); }
-
-    .post-textarea {
-      width: 100%;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 12px 14px;
-      color: var(--text);
-      font-family: 'Sora', sans-serif;
-      font-size: 14px;
-      resize: none;
-      outline: none;
-      transition: border-color .2s;
-      line-height: 1.55;
-    }
-    .post-textarea:focus { border-color: var(--gold); }
-    .post-textarea::placeholder { color: var(--muted); }
-
-    .image-preview-container { margin-top: 12px; }
-    .preview-wrapper { position: relative; display: inline-block; }
-    .preview-wrapper img {
-      max-width: 100%; border-radius: 10px;
-      border: 1px solid var(--border);
-    }
-    .remove-img {
-      display: inline-flex; align-items: center; gap: 4px;
-      margin-top: 6px;
-      font-size: 12px; color: var(--danger);
-      cursor: pointer; font-weight: 600;
-      transition: opacity .2s;
-    }
-    .remove-img:hover { opacity: .75; }
-
-    .post-actions {
-      display: flex; align-items: center; justify-content: space-between;
-      margin-top: 14px; gap: 10px;
-    }
-    .btn-attach {
-      display: inline-flex; align-items: center; gap: 6px;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 8px 14px;
-      font-size: 12px; font-weight: 600;
-      color: var(--muted); cursor: pointer;
-      transition: color .2s, border-color .2s;
-    }
-    .btn-attach:hover { color: var(--gold); border-color: var(--gold); }
-
-    .btn-primary {
-      background: linear-gradient(135deg, var(--accent) 0%, #0047ab 100%);
-      color: #fff;
-      border: none; border-radius: 8px;
-      padding: 8px 22px;
-      font-family: 'Sora', sans-serif;
-      font-size: 13px; font-weight: 700;
-      cursor: pointer; letter-spacing: 0.03em;
-      box-shadow: 0 0 18px rgba(0,47,108,0.4);
-      transition: opacity .2s, transform .15s;
-    }
-    .btn-primary:hover { opacity: .88; transform: translateY(-1px); }
-    .btn-primary:active { transform: translateY(0); }
-
-    /* ── POST CARD ── */
-    .post-header {
-      display: flex; align-items: center;
-      justify-content: space-between;
-      margin-bottom: 12px;
-    }
-    .header-info { display: flex; align-items: center; gap: 10px; }
-    .header-info strong { font-size: 14px; font-weight: 700; }
-    .post-date {
-      font-size: 12px; color: var(--muted); margin-left: 4px;
-    }
-    .post-body {
-      font-size: 14px; line-height: 1.65;
-      color: #c9cdd8;
-    }
-    .post-image-content { margin-top: 12px; }
-    .post-image-content img {
-      max-width: 100%; border-radius: 10px;
-      border: 1px solid var(--border);
-      display: block;
-    }
-
-    /* Badge verificado */
-    .official-post .header-info strong::after {
-      content: '✓';
-      display: inline-flex; align-items: center; justify-content: center;
-      width: 16px; height: 16px;
-      background: var(--gold);
-      color: #000; border-radius: 50%;
-      font-size: 9px; font-weight: 900;
-      margin-left: 5px;
-    }
-
-    /* Eliminar btn */
-    .delete-post-btn {
-      background: none; border: none;
-      color: var(--danger); font-size: 12px;
-      cursor: pointer; font-family: 'Sora', sans-serif;
-      font-weight: 600; padding: 4px 8px;
-      border-radius: 6px;
-      transition: background .2s;
-    }
-    .delete-post-btn:hover { background: rgba(224,82,82,0.12); }
-
-    /* ── DIVIDER ── */
-    .feed-divider {
-      display: flex; align-items: center; gap: 12px;
-      margin: 4px 0 20px;
-      color: var(--muted); font-size: 11px;
-      font-weight: 600; letter-spacing: 0.08em;
-      text-transform: uppercase;
-    }
-    .feed-divider::before,
-    .feed-divider::after {
-      content: ''; flex: 1;
-      height: 1px; background: var(--border);
-    }
-
-    /* ── SCROLLBAR ── */
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: var(--bg); }
-    ::-webkit-scrollbar-thumb { background: var(--surface2); border-radius: 99px; }
-
-    /* ── RESPONSIVE ── */
-    @media (max-width: 540px) {
-      .top-bar { padding: 10px 14px; }
-      .navbar { padding: 0 14px; }
-      .feed-container { padding: 18px 10px 60px; }
-      .search-container { max-width: 180px; }
-    }
+    .search-results { position: absolute; top: 110%; left: 0; right: 0; background: var(--surface2); border: 1px solid var(--border); border-radius: 12px; z-index: 1000; max-height: 300px; overflow-y: auto; }
+    
+    .sticky-sidebar { position: sticky; top: 90px; height: calc(100vh - 110px); overflow-y: auto; }
+    .sticky-sidebar::-webkit-scrollbar { display: none; }
+    
+    .custom-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 24px rgba(0,0,0,0.3); }
+    
+    /* Imágenes completas y botones */
+    .post-media-preview, .post-media { width: 100%; border-radius: 10px; margin-top: 12px; border: 1px solid var(--border); object-fit: contain; display: block; }
+    .btn-descartar { background: rgba(224,82,82,0.15); color: var(--danger); border: none; border-radius: 6px; padding: 4px 10px; font-size: 12px; font-weight: 600; cursor: pointer; transition: 0.2s; display: inline-flex; align-items: center; gap: 4px; margin-top: 8px; }
+    .btn-descartar:hover { background: rgba(224,82,82,0.25); }
+    
+    .btn-interaction { background: none; border: none; color: var(--muted); font-size: 0.9rem; transition: 0.2s; display: flex; align-items: center; gap: 6px; }
+    .btn-interaction:hover { color: var(--gold); }
+    .nav-link-custom { color: var(--muted); font-weight: 600; font-size: 14px; transition: 0.2s; border-bottom: 2px solid transparent; }
+    .nav-link-custom:hover, .nav-link-custom.active { color: var(--gold); border-bottom-color: var(--gold); }
+    .comment-box { background: var(--surface2); border-radius: 8px; padding: 10px; margin-top: 10px; }
   </style>
 </head>
 <body>
 
 <header class="header-main">
-  <div class="top-bar">
-    <!-- Logo -->
-    <a class="logo" href="#">
-      <div class="logo-mark">U</div>
-      <span class="logo-text">Red UNAM</span>
-    </a>
+  <div class="container-fluid px-lg-5">
+    <div class="d-flex align-items-center justify-content-between py-2">
+      <a href="inicioRed.html" class="d-flex align-items-center gap-2 text-decoration-none">
+        <div class="logo-mark">U</div>
+        <span class="fw-bold d-none d-sm-inline" style="letter-spacing: 1px; color: var(--text)">RED UNAM</span>
+      </a>
 
-    <!-- Buscador -->
-    <div class="search-container">
-      <input type="text" class="search-input" placeholder="Buscar en la red...">
-      <button class="search-btn">🔍</button>
-    </div>
+      <div class="position-relative flex-grow-1 mx-4" style="max-width: 400px;">
+        <div class="search-container d-flex align-items-center">
+          <i class="bi bi-search text-muted me-2"></i>
+          <input type="text" id="inputBusqueda" class="form-control bg-transparent border-0 text-white p-0 shadow-none" placeholder="Buscar compañeros..." style="font-size: 14px;">
+        </div>
+        <div id="resultadosBusqueda" class="search-results shadow-lg"></div>
+      </div>
 
-    <!-- Perfil -->
-    <div id="authArea">
-      <div class="perfil-info">
-        <span class="username">Mi Perfil</span>
-        <div class="profile-pic"></div>
+      <div class="d-flex align-items-center gap-3">
+        <div class="dropdown">
+          <a href="#" class="text-white position-relative fs-5" data-bs-toggle="dropdown">
+            <i class="bi bi-bell"></i>
+            <span id="badge-notificaciones" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none" style="font-size: 10px;">0</span>
+          </a>
+          <ul id="lista-notificaciones" class="dropdown-menu dropdown-menu-end shadow-lg p-2 mt-3" style="width: 300px; background: var(--surface2); border: 1px solid var(--border);"></ul>
+        </div>
+        <div id="authArea"></div>
       </div>
     </div>
+    
+    <nav class="d-flex gap-4 pb-1">
+      <a href="#" class="nav-link-custom active py-2">Inicio</a>
+      <a href="#" class="nav-link-custom py-2">Explorar</a>
+      <a href="#" id="btnFacultad" class="nav-link-custom py-2 text-warning">🎓 Mi Facultad</a>
+    </nav>
   </div>
-
-  <nav class="navbar">
-    <ul class="nav-links">
-      <li><a href="#" class="active">Inicio</a></li>
-      <li><a href="#">Explorar</a></li>
-      <li><a href="#">Mensajes</a></li>
-    </ul>
-  </nav>
 </header>
 
-<main class="feed-container">
-
-  <!-- CREAR POST -->
-  <article class="login-card">
-    <h3 class="create-card-title">¿Qué quieres <span>compartir</span>?</h3>
-    <textarea class="post-textarea" id="post-text" placeholder="Escribe algo para la comunidad..." rows="3"></textarea>
-    <div id="image-preview" class="image-preview-container"></div>
-    <div class="post-actions">
-      <input type="file" id="upload-image" accept="image/*" hidden>
-      <label for="upload-image" class="btn-attach">📷 Adjuntar Foto</label>
-      <button class="btn-primary" onclick="publicarPost()">Publicar</button>
+<main class="container-fluid px-lg-5 mt-4">
+  <div class="row">
+    <div class="col-lg-3 d-none d-lg-block">
+      <div class="sticky-sidebar">
+        <h6 class="text-muted text-uppercase fw-bold mb-4 small" style="letter-spacing: 1px;">Sugerencias UNAM</h6>
+        <div id="listaSugerencias"><div class="text-center p-3 small text-muted">Buscando...</div></div>
+      </div>
     </div>
-  </article>
 
-  <!-- DIVIDER -->
-  <div class="feed-divider">Publicaciones recientes</div>
+    <div class="col-lg-6">
+      <div class="custom-card">
+        <div class="d-flex gap-2 mb-3 align-items-center">
+            <img id="creatorAvatar" src="" class="rounded-circle border border-warning" width="40" height="40" style="object-fit:cover;">
+            <h3 class="font-serif mb-0" style="font-family: 'DM Serif Display', serif; font-size: 1.2rem;">¿Qué quieres <span style="color: var(--gold);">compartir</span>?</h3>
+        </div>
+        
+        <textarea id="postContent" class="form-control bg-dark border-0 text-white mb-3" rows="3" placeholder="Escribe algo para la comunidad..." style="border-radius: 12px; resize: none;"></textarea>
+        
+        <div id="filePreviewContainer" class="mb-3 d-none">
+            <img id="filePreviewImg" class="post-media-preview" src="">
+            <button id="btnDescartarCreacion" class="btn-descartar"><i class="bi bi-x-circle"></i> Descartar imagen</button>
+        </div>
 
-  <!-- TIMELINE -->
-  <div id="posts-timeline">
-    <!-- POST OFICIAL -->
-    <article class="login-card official-post">
-      <div class="post-header">
-        <div class="header-info">
-          <div class="profile-pic official-pic"></div>
-          <div>
-            <strong>FES Aragón UNAM</strong>
-            <span class="post-date">• Comunicado 05/05/26</span>
-          </div>
+        <div class="d-flex justify-content-between align-items-center">
+          <label for="postFile" class="btn btn-sm btn-outline-secondary border-0" style="cursor:pointer">
+            <i class="bi bi-camera-fill me-1"></i> Foto/Video
+            <input type="file" id="postFile" hidden accept="image/*,video/*">
+          </label>
+          <button id="btnPublicar" class="btn btn-primary px-4 fw-bold" style="background: linear-gradient(135deg, var(--accent), #0047ab); border: none; border-radius: 8px;">
+            Publicar
+          </button>
         </div>
       </div>
-      <p class="post-body">#OrgulloUNAM — Bienvenidos a la red oficial de nuestra comunidad universitaria.</p>
-      <div class="post-image-content">
-        <img src="https://scontent.fmex46-1.fna.fbcdn.net/v/t39.30808-6/690755363_1383621163796105_5224523420763221482_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=13d280&_nc_eui2=AeE0WOsx4dCsLMX4x-USNc_oBXUlKoc_-rkFdSUqhz_6udxMYicReVEaS2Tk8_JQLhKBToMuIIziTzaeDdfp1Uj_&_nc_ohc=jyZtb_n-zIsQ7kNvwGbkEN3&_nc_oc=AdrGx-NRcMPmr69b4Q6rHTJ1DjBNwx3RbtrSjjzpfI-DyYVBVcy_v2tjdSdGsdV7Z6U&_nc_zt=23&_nc_ht=scontent.fmex46-1.fna&_nc_gid=NPceYWVIth-1vcA-K4WrdA&_nc_ss=7b2a8&oh=00_Af5z3cymo1jX-iHPtU8qM1NhLw1cfzkCCBeHodIGlzptSQ&oe=6A005305" alt="FES Aragón">
+
+      <div class="d-flex align-items-center gap-3 my-4">
+        <hr class="flex-grow-1 opacity-10">
+        <span class="text-muted small fw-bold text-uppercase" style="letter-spacing: 2px; font-size: 10px;">Recientes</span>
+        <hr class="flex-grow-1 opacity-10">
       </div>
-    </article>
+
+      <div id="feedPublicaciones">
+        <div class="text-center p-5"><div class="spinner-border" style="color: var(--gold);"></div></div>
+      </div>
+    </div>
+
+    <div class="col-lg-3 d-none d-lg-block">
+        <div class="sticky-sidebar">
+          <div class="custom-card text-center">
+            <h6 class="text-muted small fw-bold mb-3">MENSAJES DIRECTOS</h6>
+            <i class="bi bi-chat-heart text-gold mb-2 d-block" style="font-size: 2rem; color: var(--gold);"></i>
+            <p class="small text-muted">Próximamente: Chat Universitario en tiempo real.</p>
+          </div>
+        </div>
+    </div>
   </div>
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/conexion.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
 <script>
-  // ── NOMBRE DEL BUCKET en Supabase Storage ──────────────────────────────────
-  // Crea un bucket llamado "publicaciones-media" en tu panel de Supabase
-  // Storage → New bucket → nombre: publicaciones-media → Public bucket: ✅
-  const BUCKET = 'publicaciones-media';
-
-  const fileInput        = document.getElementById('upload-image');
-  const previewContainer = document.getElementById('image-preview');
-  const postText         = document.getElementById('post-text');
-  const timeline         = document.getElementById('posts-timeline');
-  let   currentFile      = null;   // File object real (no base64)
-
-  // Validar sesión
+  // ── SEGURIDAD Y SESIÓN ──────────────────────────────────────────
   const sesionData = localStorage.getItem("sesion");
   if (!sesionData) window.location.replace("index.html");
   const sesion = JSON.parse(sesionData);
+  const BUCKET = 'publicaciones-media';
 
-  // Mostrar nombre en el perfil del header
-  document.querySelector('.username').textContent = sesion.nombre || 'Mi Perfil';
+  // Memoria global de posts para poder editarlos y cancelarlos sin recargar BD
+  let postsGlobales = [];
 
-  // ── PREVISUALIZAR IMAGEN ────────────────────────────────────────────────────
-  fileInput.addEventListener('change', function () {
-    const file = this.files[0];
-    if (!file) return;
-    currentFile = file;
-    const url = URL.createObjectURL(file);
-    previewContainer.innerHTML = `
-      <div class="preview-wrapper">
-        <img src="${url}">
-        <div class="remove-img" onclick="removeImage()">✕ Quitar imagen</div>
-      </div>`;
+  // --- UTILIDADES ---
+  const getInst = (email) => {
+      if (email?.endsWith('@aragon.unam.mx')) return "FES Aragón";
+      if (email?.endsWith('@ingenieria.unam.mx')) return "Facultad de Ingeniería";
+      return "Comunidad UNAM";
+  };
+  const getAvatarURL = (s) => s?.foto_perfil || `https://ui-avatars.com/api/?name=${encodeURIComponent(s?.nombre || 'U')}&background=c8a951&color=000&bold=true`;
+
+  async function init() {
+      document.getElementById('creatorAvatar').src = getAvatarURL(sesion);
+      renderUserHeader();
+      cargarPublicaciones();
+      setupSearch();
+  }
+
+  function renderUserHeader() {
+      const avatar = getAvatarURL(sesion);
+      document.getElementById("authArea").innerHTML = `
+          <div class="dropdown">
+              <div class="d-flex align-items-center gap-2 cursor-pointer" data-bs-toggle="dropdown">
+                  <span class="small fw-bold d-none d-md-block">${sesion.nombre.split(' ')[0]}</span>
+                  <img src="${avatar}" class="rounded-circle border border-warning" width="35" height="35" style="object-fit:cover;">
+              </div>
+              <ul class="dropdown-menu dropdown-menu-end shadow-lg mt-2" style="background: var(--surface2); border: 1px solid var(--border);">
+                  <li><a class="dropdown-item small" href="perfil.html">Ver Mi Perfil</a></li>
+                  <li><button class="dropdown-item small text-danger" onclick="logout()">Cerrar Sesión</button></li>
+              </ul>
+          </div>`;
+      document.getElementById("btnFacultad").innerText = `🎓 ${getInst(sesion.email)}`;
+  }
+
+  // --- CREACIÓN DE POST (IMAGEN) ---
+  const postFile = document.getElementById("postFile");
+  const previewCont = document.getElementById("filePreviewContainer");
+  const previewImg = document.getElementById("filePreviewImg");
+  const btnDescartarCreacion = document.getElementById("btnDescartarCreacion");
+  
+  postFile.addEventListener('change', function() {
+      const file = this.files[0];
+      if (file && file.type.startsWith('image/')) {
+          previewImg.src = URL.createObjectURL(file);
+          previewCont.classList.remove('d-none');
+      }
   });
 
-  function removeImage() {
-    fileInput.value = "";
-    previewContainer.innerHTML = "";
-    currentFile = null;
-  }
+  btnDescartarCreacion.addEventListener('click', () => {
+      postFile.value = '';
+      previewCont.classList.add('d-none');
+      previewImg.src = '';
+  });
 
-  // ── SUBIR ARCHIVO A SUPABASE STORAGE ───────────────────────────────────────
-  // ⚠️ REQUISITO: En Supabase → Storage → publicaciones-media → Policies
-  // Agrega esta política para permitir uploads sin autenticación nativa:
-  //   Policy name: "Allow all uploads"
-  //   Allowed operations: INSERT
-  //   Target roles: anon, authenticated
-  //   Policy definition: true
-  async function subirArchivoStorage(file) {
-    const ext      = file.name.split('.').pop().toLowerCase();
-    const fileName = `${sesion.id}/${Date.now()}.${ext}`;
+  document.getElementById("btnPublicar").onclick = async () => {
+      const btn = document.getElementById("btnPublicar");
+      const txt = document.getElementById("postContent").value.trim();
+      const file = postFile.files[0];
+      
+      if (!txt && !file) return;
+      btn.disabled = true; btn.innerText = "Publicando...";
 
-    const { data, error } = await window.supabaseClient
-      .storage
-      .from(BUCKET)
-      .upload(fileName, file, {
-        cacheControl: '3600',
-        upsert: false,
-        contentType: file.type
-      });
-
-    if (error) {
-      // Error RLS: guía al usuario
-      if (error.message.includes('row-level security') || error.message.includes('policy')) {
-        throw new Error(
-          'Permiso denegado en Storage.\n\n' +
-          'Ve a Supabase → Storage → publicaciones-media → Policies\n' +
-          'y agrega una política INSERT para "anon" con definición: true'
-        );
+      try {
+          let url = null, type = null;
+          if (file) {
+              const path = `${sesion.id}/${Date.now()}_${file.name}`;
+              await window.supabaseClient.storage.from(BUCKET).upload(path, file);
+              url = window.supabaseClient.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
+              type = file.type;
+          }
+          await window.supabaseClient.from('publicaciones').insert([{ 
+              autor_id: sesion.id, autor_nombre: sesion.nombre, 
+              contenido_texto: txt, archivo_url: url, tipo_archivo: type 
+          }]);
+          location.reload();
+      } catch (e) {
+          alert("Error: " + e.message);
+          btn.disabled = false; btn.innerText = "Publicar";
       }
-      throw new Error('Storage: ' + error.message);
-    }
+  };
 
-    const { data: urlData } = window.supabaseClient
-      .storage
-      .from(BUCKET)
-      .getPublicUrl(data.path);
-
-    return urlData.publicUrl;
-  }
-
-  // ── PUBLICAR POST ───────────────────────────────────────────────────────────
-  async function publicarPost() {
-    const text = postText.value.trim();
-    if (text === "" && !currentFile) return;
-
-    // Deshabilitar botón mientras se sube
-    const btn = document.querySelector('.btn-primary');
-    btn.textContent = 'Publicando...';
-    btn.disabled = true;
-
-    try {
-      let archivo_url  = null;
-      let tipo_archivo = null;
-
-      // 1) Subir imagen a Storage si hay una
-      if (currentFile) {
-        archivo_url  = await subirArchivoStorage(currentFile);
-        tipo_archivo = currentFile.type;   // ej: "image/jpeg"
-      }
-
-      // 2) Insertar registro en la tabla "publicaciones"
-      //    Campos correctos según tu esquema de Supabase:
-      //    id, autor_id, autor_nombre, contenido_texto,
-      //    archivo_url, tipo_archivo, likes_count, creado_a_las
-      const nuevoPost = {
-        autor_id:        sesion.id,
-        autor_nombre:    sesion.nombre,
-        contenido_texto: text,
-        archivo_url,          // ← nombre correcto (antes estaba multimedia_url)
-        tipo_archivo          // ← columna extra de tu tabla
-      };
-
-      const { data, error } = await window.supabaseClient
-        .from('publicaciones')
-        .insert([nuevoPost])
-        .select();
-
-      if (error) throw error;
-
-      renderizarPostEnHTML(data[0], true);
-      postText.value = "";
-      removeImage();
-
-    } catch (err) {
-      alert("Error al publicar: " + err.message);
-    } finally {
-      btn.textContent = 'Publicar';
-      btn.disabled = false;
-    }
-  }
-
-  // ── CARGAR PUBLICACIONES ────────────────────────────────────────────────────
+  // --- CARGAR POSTS ---
   async function cargarPublicaciones() {
-    timeline.innerHTML = '<p style="text-align:center;padding:32px;color:var(--muted);font-size:13px;">Cargando...</p>';
-    try {
-      const { data, error } = await window.supabaseClient
-        .from('publicaciones')
-        .select('*')
-        .order('creado_a_las', { ascending: false });
-      if (error) throw error;
-      timeline.innerHTML = '';
-      if (data.length === 0) {
-        timeline.innerHTML = '<p style="text-align:center;padding:32px;color:var(--muted);font-size:13px;">Sé el primero en publicar algo ✨</p>';
-        return;
-      }
-      data.forEach(post => renderizarPostEnHTML(post));
-    } catch (err) {
-      timeline.innerHTML = '';
-      console.error("Error al cargar posts:", err.message);
-    }
+      const feed = document.getElementById("feedPublicaciones");
+      const { data: posts, error } = await window.supabaseClient.from('publicaciones')
+          .select('*, usuarios(foto_perfil)').order('creado_a_las', { ascending: false });
+      if (error) { feed.innerHTML = '<p class="text-center text-muted">Error al cargar.</p>'; return; }
+      
+      postsGlobales = posts;
+      feed.innerHTML = posts.map(p => generarHTMLPost(p)).join('');
   }
 
-  // ── RENDERIZAR POST ─────────────────────────────────────────────────────────
-  function renderizarPostEnHTML(post, alPrincipio = false) {
-    const fecha = new Date(post.creado_a_las).toLocaleString('es-MX', {
-      day: '2-digit', month: 'short', year: 'numeric',
-      hour: '2-digit', minute: '2-digit'
-    });
-    const article = document.createElement('article');
-    article.className = 'login-card';
-    article.id = `post-${post.id}`;
+  function generarHTMLPost(p) {
+      const esMio = p.autor_id === sesion.id;
+      const avatarAutor = p.usuarios?.foto_perfil || `https://ui-avatars.com/api/?name=${encodeURIComponent(p.autor_nombre)}&background=random`;
+      const fecha = new Date(p.creado_a_las).toLocaleString('es-MX', {day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit'});
+      
+      // Controles de autor
+      const controles = esMio ? `
+          <div class="dropdown">
+              <button class="btn btn-link text-muted p-0 text-decoration-none" data-bs-toggle="dropdown">⋮</button>
+              <ul class="dropdown-menu dropdown-menu-end shadow" style="background:var(--surface2);">
+                  <li><button class="dropdown-item small text-white" onclick="activarEdicion(${p.id})"><i class="bi bi-pencil me-2"></i>Editar</button></li>
+                  <li><button class="dropdown-item small text-danger" onclick="eliminarPost(${p.id}, '${p.archivo_url || ''}')"><i class="bi bi-trash me-2"></i>Eliminar</button></li>
+              </ul>
+          </div>` : '';
 
-    const btnEliminar = post.autor_id === sesion.id
-      ? `<button class="delete-post-btn" onclick="eliminarEstePost(${post.id}, '${post.archivo_url || ''}')">Eliminar</button>`
-      : '';
+      const mediaHtml = p.archivo_url ? `<img id="img-post-${p.id}" src="${p.archivo_url}" class="post-media" loading="lazy">` : '';
 
-    // Mostrar imagen si existe (viene de Storage como URL pública)
-    const mediaHtml = post.archivo_url
-      ? `<div class="post-image-content"><img src="${post.archivo_url}" loading="lazy"></div>`
-      : '';
-
-    article.innerHTML = `
-      <div class="post-header">
-        <div class="header-info">
-          <div class="profile-pic"></div>
-          <div>
-            <strong>${post.autor_nombre}</strong>
-            <span class="post-date">• ${fecha}</span>
+      return `
+      <div class="custom-card shadow-sm" id="card-${p.id}">
+          <div id="vista-normal-${p.id}">
+              <div class="d-flex align-items-center justify-content-between mb-3">
+                  <div class="d-flex align-items-center gap-2 cursor-pointer" onclick="location.href='perfil.html?id=${p.autor_id}'">
+                      <img src="${avatarAutor}" class="rounded-circle border border-secondary" width="38" height="38" style="object-fit:cover;">
+                      <div>
+                          <h6 class="mb-0 fw-bold small">${p.autor_nombre}</h6>
+                          <small class="text-muted" style="font-size: 10px;">${fecha}</small>
+                      </div>
+                  </div>
+                  ${controles}
+              </div>
+              <p id="texto-post-${p.id}" class="small mb-2 text-light" style="line-height: 1.6; white-space: pre-wrap;">${p.contenido_texto || ''}</p>
+              <div id="media-container-${p.id}">${mediaHtml}</div>
           </div>
-        </div>
-        ${btnEliminar}
-      </div>
-      <p class="post-body">${post.contenido_texto || ''}</p>
-      ${mediaHtml}`;
 
-    alPrincipio ? timeline.prepend(article) : timeline.appendChild(article);
+          <div id="vista-edicion-${p.id}" class="d-none">
+              <h6 class="text-gold mb-2 small"><i class="bi bi-pencil-square"></i> Editando publicación</h6>
+              <textarea id="edit-texto-${p.id}" class="form-control bg-dark text-white border-secondary mb-2" rows="3">${p.contenido_texto || ''}</textarea>
+              
+              <div id="edit-media-preview-${p.id}" class="${p.archivo_url ? '' : 'd-none'}">
+                  ${p.archivo_url ? `<img src="${p.archivo_url}" class="post-media-preview opacity-50 border-danger mb-2">` : ''}
+                  <button id="btn-desc-edit-${p.id}" class="btn-descartar mb-3" onclick="marcarImagenParaBorrar(${p.id})"><i class="bi bi-trash"></i> Eliminar esta imagen</button>
+              </div>
+              
+              <div class="d-flex justify-content-end gap-2 mt-2">
+                  <button class="btn btn-sm btn-outline-secondary" onclick="cancelarEdicion(${p.id})">Cancelar</button>
+                  <button class="btn btn-sm btn-primary" onclick="guardarEdicion(${p.id})">Guardar cambios</button>
+              </div>
+          </div>
+      </div>`;
   }
 
-  // ── ELIMINAR POST (tabla + Storage) ────────────────────────────────────────
-  async function eliminarEstePost(postId, archivoUrl) {
-    if (!confirm("¿Deseas eliminar este post?")) return;
-    try {
-      // 1) Borrar de la tabla
-      const { error } = await window.supabaseClient
-        .from('publicaciones')
-        .delete()
-        .eq('id', postId)
-        .eq('autor_id', sesion.id);
-      if (error) throw error;
+  // --- LÓGICA DE EDICIÓN ---
+  let postsEditandoEstado = {}; // Para guardar si el usuario descartó la imagen en la UI
 
-      // 2) Borrar archivo de Storage si existía
-      if (archivoUrl) {
-        // Extraer la ruta relativa dentro del bucket desde la URL pública
-        const path = archivoUrl.split(`/${BUCKET}/`)[1];
-        if (path) {
-          await window.supabaseClient.storage.from(BUCKET).remove([path]);
-        }
+  window.activarEdicion = (id) => {
+      postsEditandoEstado[id] = { eliminarImagen: false }; // Reiniciar estado
+      document.getElementById(`vista-normal-${id}`).classList.add('d-none');
+      document.getElementById(`vista-edicion-${id}`).classList.remove('d-none');
+  };
+
+  window.cancelarEdicion = (id) => {
+      const post = postsGlobales.find(p => p.id === id);
+      // Restaurar textarea
+      document.getElementById(`edit-texto-${id}`).value = post.contenido_texto || '';
+      // Restaurar UI de imagen
+      if(post.archivo_url) {
+          document.getElementById(`edit-media-preview-${id}`).classList.remove('d-none');
+          document.getElementById(`btn-desc-edit-${id}`).style.display = 'inline-flex';
+      }
+      
+      document.getElementById(`vista-edicion-${id}`).classList.add('d-none');
+      document.getElementById(`vista-normal-${id}`).classList.remove('d-none');
+  };
+
+  window.marcarImagenParaBorrar = (id) => {
+      postsEditandoEstado[id].eliminarImagen = true;
+      // Ocultar visualmente la imagen en el editor para que el usuario sepa que se quitará
+      document.getElementById(`edit-media-preview-${id}`).classList.add('d-none');
+  };
+
+  window.guardarEdicion = async (id) => {
+      const postOriginal = postsGlobales.find(p => p.id === id);
+      const nuevoTexto = document.getElementById(`edit-texto-${id}`).value.trim();
+      const borrarImagen = postsEditandoEstado[id].eliminarImagen;
+
+      let updates = { contenido_texto: nuevoTexto };
+      
+      // Si el usuario confirmó eliminar la imagen
+      if (borrarImagen && postOriginal.archivo_url) {
+          updates.archivo_url = null;
+          updates.tipo_archivo = null;
+          // Borrar de Storage
+          const path = postOriginal.archivo_url.split(`/${BUCKET}/`)[1];
+          if (path) await window.supabaseClient.storage.from(BUCKET).remove([path]);
       }
 
-      document.getElementById(`post-${postId}`).remove();
-    } catch (err) {
-      alert("Error al eliminar: " + err.message);
-    }
+      try {
+          const { error } = await window.supabaseClient.from('publicaciones').update(updates).eq('id', id);
+          if (error) throw error;
+
+          // Actualizar UI localmente sin recargar toda la página
+          document.getElementById(`texto-post-${id}`).innerText = nuevoTexto;
+          postOriginal.contenido_texto = nuevoTexto;
+          
+          if (borrarImagen) {
+              postOriginal.archivo_url = null;
+              document.getElementById(`media-container-${id}`).innerHTML = '';
+          }
+
+          cancelarEdicion(id); // Vuelve a vista normal
+      } catch (err) {
+          alert("Error al actualizar: " + err.message);
+      }
+  };
+
+  // --- LÓGICA DE ELIMINAR ---
+  window.eliminarPost = async (id, archivoUrl) => {
+      if(!confirm("¿Eliminar publicación permanentemente?")) return;
+      try {
+          await window.supabaseClient.from('publicaciones').delete().eq('id', id).eq('autor_id', sesion.id);
+          if (archivoUrl) {
+              const path = archivoUrl.split(`/${BUCKET}/`)[1];
+              if (path) await window.supabaseClient.storage.from(BUCKET).remove([path]);
+          }
+          document.getElementById(`card-${id}`).remove();
+      } catch (err) { alert("Error: " + err.message); }
+  };
+
+  // --- BÚSQUEDA ---
+  function setupSearch() {
+      document.getElementById('inputBusqueda').oninput = async (e) => {
+          const q = e.target.value.trim();
+          const res = document.getElementById('resultadosBusqueda');
+          if (q.length < 2) { res.innerHTML = ""; return; }
+          const { data } = await window.supabaseClient.from('usuarios').select('id, nombre').ilike('nombre', `%${q}%`).limit(5);
+          res.innerHTML = data.map(u => `<div class="p-2 border-bottom border-secondary text-white small cursor-pointer" onclick="location.href='perfil.html?id=${u.id}'">${u.nombre}</div>`).join('');
+      };
   }
 
-  // Guard para evitar doble carga
-  let yaInicio = false;
-  document.addEventListener("DOMContentLoaded", () => {
-    if (yaInicio) return;
-    yaInicio = true;
-    cargarPublicaciones();
-  });
+  window.logout = () => { localStorage.removeItem('sesion'); location.replace('index.html'); };
+  
+  document.addEventListener("DOMContentLoaded", init);
 </script>
 </body>
 </html>
