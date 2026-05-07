@@ -212,180 +212,779 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-  (function() {
-    const sesion = JSON.parse(localStorage.getItem("sesion"));
-    const BUCKET = 'publicaciones-media';
 
-    if (!sesion) { window.location.replace("index.html"); return; }
+(function() {
 
-    // --- UTILIDADES ---
-    const getInst = (email) => {
-        if (email?.endsWith('@aragon.unam.mx')) return "FES Aragón";
-        if (email?.endsWith('@ingenieria.unam.mx')) return "Facultad de Ingeniería";
-        return "Comunidad UNAM";
-    };
+const sesion = JSON.parse(localStorage.getItem("sesion"));
+const BUCKET = 'publicaciones-media';
 
-    // --- NÚCLEO DE CARGA ---
-    async function init() {
-        renderUserHeader();
-        cargarPublicaciones();
-        cargarNotificaciones();
-        cargarSugerencias();
-        setupSearch();
-    }
+function validarSesion() {
 
-    function renderUserHeader() {
-        const avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(sesion.nombre)}&background=c8a951&color=000&bold=true`;
-        document.getElementById("authArea").innerHTML = `
-            <div class="dropdown">
-                <div class="d-flex align-items-center gap-2 cursor-pointer" data-bs-toggle="dropdown">
-                    <span class="small fw-bold d-none d-md-block">${sesion.nombre.split(' ')[0]}</span>
-                    <img src="${avatar}" class="rounded-circle border border-warning" width="35" height="35">
-                </div>
-                <ul class="dropdown-menu dropdown-menu-end shadow-lg mt-2" style="background: var(--surface2); border: 1px solid var(--border);">
-                    <li class="p-3 text-center">
-                        <img src="${avatar}" class="rounded-circle mb-2" width="50">
-                        <div class="fw-bold text-white small">${sesion.nombre}</div>
-                        <div class="text-gold" style="font-size: 10px; color: var(--gold)">${getInst(sesion.email)}</div>
-                    </li>
-                    <li><hr class="dropdown-divider opacity-10"></li>
-                    <li><a class="dropdown-item small" href="perfil.html">Ver Perfil</a></li>
-                    <li><button class="dropdown-item small text-danger" onclick="logout()">Cerrar Sesión</button></li>
-                </ul>
-            </div>`;
-        document.getElementById("btnFacultad").innerText = `🎓 ${getInst(sesion.email)}`;
-    }
+const sesionGuardada = localStorage.getItem("sesion");
 
-    // --- FUNCIONALIDADES DE POSTS ---
-    async function cargarPublicaciones() {
-        const { data: posts, error } = await window.supabaseClient.from('publicaciones').select('*, comentarios(*)').order('creado_a_las', { ascending: false });
-        const feed = document.getElementById("feedPublicaciones");
-        if (error) return;
+if (!sesionGuardada) {
+window.location.replace("index.html");
+return false;
+}
 
-        feed.innerHTML = posts.map(p => {
-            const esMio = p.autor_id === sesion.id;
-            const media = p.archivo_url ? (p.tipo_archivo?.includes('video') ? `<video src="${p.archivo_url}" controls class="post-media"></video>` : `<img src="${p.archivo_url}" class="post-media">`) : "";
-            const fecha = new Date(p.creado_a_las).toLocaleString();
-            
-            return `
-                <div class="custom-card shadow-sm">
-                    <div class="d-flex align-items-center justify-content-between mb-3">
-                        <div class="d-flex align-items-center gap-2 cursor-pointer" onclick="location.href='perfil.html?id=${p.autor_id}'">
-                            <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(p.autor_nombre)}&background=random" class="rounded-circle" width="38">
-                            <div>
-                                <h6 class="mb-0 fw-bold small">${p.autor_nombre} ${p.autor_id === 'oficial' ? '<i class="bi bi-patch-check-fill text-info"></i>' : ''}</h6>
-                                <small class="text-muted" style="font-size: 10px;">${fecha}</small>
-                            </div>
-                        </div>
-                        ${esMio ? `<button class="btn btn-link text-danger btn-sm p-0" onclick="eliminarPost(${p.id})"><i class="bi bi-trash"></i></button>` : ''}
-                    </div>
-                    <p class="small mb-2" style="line-height: 1.6;">${p.contenido_texto}</p>
-                    ${media}
-                    <div class="d-flex gap-4 mt-3 pt-2 border-top border-secondary opacity-50">
-                        <button class="btn-interaction" onclick="toggleLike(${p.id}, ${p.likes_count || 0}, '${p.autor_id}')">
-                            <i class="bi bi-heart"></i> ${p.likes_count || 0}
-                        </button>
-                        <button class="btn-interaction" onclick="toggleComments(${p.id})">
-                            <i class="bi bi-chat"></i> Comentar
-                        </button>
-                    </div>
-                    <div id="caja-${p.id}" class="d-none mt-3">
-                        <div class="comments-list mb-2">
-                            ${(p.comentarios || []).map(c => `
-                                <div class="comment-box small">
-                                    <b class="text-gold" style="color: var(--gold)">${c.autor_comentario_nombre}:</b> ${c.contenido_comentario}
-                                </div>
-                            `).join('')}
-                        </div>
-                        <div class="input-group input-group-sm">
-                            <input type="text" id="in-${p.id}" class="form-control bg-dark border-0 text-white" placeholder="Escribe un comentario...">
-                            <button class="btn btn-gold btn-sm" onclick="sendComment(${p.id}, '${p.autor_id}')" style="background: var(--gold); color: black;">Enviar</button>
-                        </div>
-                    </div>
-                </div>`;
-        }).join('');
-    }
+return true;
+}
 
-    // --- EVENTOS ---
-    document.getElementById("btnPublicar").onclick = async () => {
-        const btn = document.getElementById("btnPublicar");
-        const txt = document.getElementById("postContent").value.trim();
-        const file = document.getElementById("postFile").files[0];
-        
-        if (!txt && !file) return;
-        
-        btn.disabled = true;
-        btn.innerText = "...";
+if (!validarSesion()) return;
 
-        let url = null, type = null;
-        if (file) {
-            const path = `posts/${Date.now()}_${file.name}`;
-            await window.supabaseClient.storage.from(BUCKET).upload(path, file);
-            url = window.supabaseClient.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
-            type = file.type;
-        }
+// ─────────────────────────────────────────────────────────────
+// UTILIDADES
+// ─────────────────────────────────────────────────────────────
 
-        await window.supabaseClient.from('publicaciones').insert([{ 
-            autor_id: sesion.id, 
-            autor_nombre: sesion.nombre, 
-            contenido_texto: txt, 
-            archivo_url: url, 
-            tipo_archivo: type 
-        }]);
+const getInst = (email) => {
 
-        location.reload();
-    };
+if (email?.endsWith('@aragon.unam.mx')) return "FES Aragón";
+if (email?.endsWith('@ingenieria.unam.mx')) return "Facultad de Ingeniería";
 
-    window.toggleComments = (id) => document.getElementById(`caja-${id}`).classList.toggle('d-none');
+return "Comunidad UNAM";
+};
 
-    window.logout = () => {
-        localStorage.removeItem('sesion');
-        location.href = 'index.html';
-    };
+function getProfilePhoto(user = sesion) {
 
-    // --- CARGAS SOCIALES ---
-    async function cargarNotificaciones() {
-        const { data: notifs } = await window.supabaseClient.from('notificaciones').select('*').eq('usuario_id', sesion.id).order('creado_a_las', { ascending: false }).limit(8);
-        const badge = document.getElementById("badge-notificaciones");
-        const lista = document.getElementById("lista-notificaciones");
-        
-        const unread = notifs?.filter(n => !n.leida).length || 0;
-        badge.innerText = unread;
-        unread > 0 ? badge.classList.remove("d-none") : badge.classList.add("d-none");
+return user.foto_perfil ||
+`https://ui-avatars.com/api/?name=${encodeURIComponent(user.nombre)}&background=c8a951&color=000&bold=true`;
 
-        lista.innerHTML = notifs?.length ? 
-            notifs.map(n => `<li class="p-2 small border-bottom border-secondary ${n.leida ? '' : 'bg-dark'}"><b>${n.emisor_nombre}</b> ${n.tipo}</li>`).join('') + 
-            `<li class="text-center mt-2"><button class="btn btn-link btn-sm text-gold p-0" onclick="markAllRead()">Marcar todo como leído</button></li>` 
-            : '<li class="text-center p-3 small">Sin novedades</li>';
-    }
+}
 
-    async function cargarSugerencias() {
-        const { data: users } = await window.supabaseClient.from('usuarios').select('id, nombre, email').neq('id', sesion.id).limit(5);
-        document.getElementById("listaSugerencias").innerHTML = users.map(u => `
-            <div class="d-flex align-items-center justify-content-between mb-3">
-                <div class="d-flex align-items-center gap-2">
-                    <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(u.nombre)}&background=random" class="rounded-circle" width="32">
-                    <div>
-                        <div class="fw-bold" style="font-size: 12px;">${u.nombre}</div>
-                        <div class="text-muted" style="font-size: 9px;">${getInst(u.email)}</div>
-                    </div>
-                </div>
-                <button class="btn btn-sm text-gold fw-bold p-0" style="font-size: 11px;" onclick="addFriend('${u.id}')">Seguir</button>
-            </div>`).join('');
-    }
+// ─────────────────────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────────────────────
 
-    function setupSearch() {
-        document.getElementById('inputBusqueda').oninput = async (e) => {
-            const q = e.target.value.trim();
-            const res = document.getElementById('resultadosBusqueda');
-            if (q.length < 2) { res.innerHTML = ""; return; }
-            const { data } = await window.supabaseClient.from('usuarios').select('id, nombre').ilike('nombre', `%${q}%`).limit(5);
-            res.innerHTML = data.map(u => `<div class="p-2 border-bottom border-secondary text-white small cursor-pointer hover-gold" onclick="location.href='perfil.html?id=${u.id}'">${u.nombre}</div>`).join('');
-        };
-    }
+async function init() {
 
-    init();
-  })();
+renderUserHeader();
+
+await cargarPublicaciones();
+
+cargarNotificaciones();
+
+cargarSugerencias();
+
+setupSearch();
+
+}
+
+init();
+
+// ─────────────────────────────────────────────────────────────
+// HEADER
+// ─────────────────────────────────────────────────────────────
+
+function renderUserHeader() {
+
+const avatar = getProfilePhoto();
+
+document.getElementById("authArea").innerHTML = `
+<div class="dropdown">
+
+<div class="d-flex align-items-center gap-2 cursor-pointer"
+data-bs-toggle="dropdown">
+
+<span class="small fw-bold d-none d-md-block">
+${sesion.nombre.split(' ')[0]}
+</span>
+
+<img
+src="${avatar}"
+class="rounded-circle border border-warning"
+width="36"
+height="36"
+style="object-fit:cover;"
+>
+
+</div>
+
+<ul class="dropdown-menu dropdown-menu-end shadow-lg mt-2"
+style="background: var(--surface2); border: 1px solid var(--border);">
+
+<li class="p-3 text-center">
+
+<img
+src="${avatar}"
+class="rounded-circle mb-2"
+width="55"
+height="55"
+style="object-fit:cover;"
+>
+
+<div class="fw-bold text-white small">
+${sesion.nombre}
+</div>
+
+<div class="text-gold"
+style="font-size: 10px; color: var(--gold)">
+${getInst(sesion.email)}
+</div>
+
+</li>
+
+<li><hr class="dropdown-divider opacity-10"></li>
+
+<li>
+<a class="dropdown-item small" href="perfil.html">
+Ver Perfil
+</a>
+</li>
+
+<li>
+<button
+class="dropdown-item small text-danger"
+onclick="logout()"
+>
+Cerrar Sesión
+</button>
+</li>
+
+</ul>
+
+</div>`;
+}
+
+// ─────────────────────────────────────────────────────────────
+// PREVIEW
+// ─────────────────────────────────────────────────────────────
+
+const postFile = document.getElementById("postFile");
+const filePreview = document.getElementById("filePreview");
+
+const removeBtn = document.createElement("button");
+
+removeBtn.className =
+"btn btn-sm btn-outline-danger mt-2 d-none";
+
+removeBtn.innerText = "Eliminar archivo";
+
+filePreview.after(removeBtn);
+
+postFile.addEventListener("change", () => {
+
+const file = postFile.files[0];
+
+if (!file) return;
+
+const url = URL.createObjectURL(file);
+
+if (file.type.startsWith("video")) {
+
+filePreview.innerHTML = `
+<video
+src="${url}"
+controls
+class="post-media"
+style="max-height:500px;object-fit:contain;background:black;"
+></video>
+`;
+
+} else {
+
+filePreview.innerHTML = `
+<img
+src="${url}"
+class="post-media"
+style="max-height:500px;object-fit:contain;background:black;"
+>
+`;
+}
+
+removeBtn.classList.remove("d-none");
+
+});
+
+removeBtn.onclick = () => {
+
+postFile.value = "";
+
+filePreview.innerHTML = "";
+
+removeBtn.classList.add("d-none");
+
+};
+
+// ─────────────────────────────────────────────────────────────
+// PUBLICAR
+// ─────────────────────────────────────────────────────────────
+
+document.getElementById("btnPublicar").onclick = async () => {
+
+const btn = document.getElementById("btnPublicar");
+
+const txt =
+document.getElementById("postContent").value.trim();
+
+const file = postFile.files[0];
+
+if (!txt && !file) return;
+
+btn.disabled = true;
+btn.innerText = "Publicando...";
+
+try {
+
+let url = null;
+let type = null;
+
+if (file) {
+
+const path =
+`posts/${Date.now()}_${file.name}`;
+
+const { error: uploadError } =
+await window.supabaseClient.storage
+.from(BUCKET)
+.upload(path, file);
+
+if (uploadError) throw uploadError;
+
+url = window.supabaseClient.storage
+.from(BUCKET)
+.getPublicUrl(path).data.publicUrl;
+
+type = file.type;
+}
+
+const { error } =
+await window.supabaseClient
+.from('publicaciones')
+.insert([{
+
+autor_id: sesion.id,
+
+autor_nombre: sesion.nombre,
+
+autor_foto: sesion.foto_perfil || null,
+
+contenido_texto: txt,
+
+archivo_url: url,
+
+tipo_archivo: type
+
+}]);
+
+if (error) throw error;
+
+document.getElementById("postContent").value = "";
+
+postFile.value = "";
+
+filePreview.innerHTML = "";
+
+removeBtn.classList.add("d-none");
+
+await cargarPublicaciones();
+
+} catch(err) {
+
+alert(err.message);
+
+} finally {
+
+btn.disabled = false;
+
+btn.innerText = "Publicar";
+}
+};
+
+// ─────────────────────────────────────────────────────────────
+// CARGAR POSTS
+// ─────────────────────────────────────────────────────────────
+
+async function cargarPublicaciones() {
+
+const feed =
+document.getElementById("feedPublicaciones");
+
+feed.innerHTML = `
+<div class="text-center p-5">
+<div class="spinner-border"
+style="color:var(--gold)">
+</div>
+</div>`;
+
+const { data: posts, error } =
+await window.supabaseClient
+.from('publicaciones')
+.select('*')
+.order('creado_a_las', { ascending: false });
+
+if (error) {
+
+feed.innerHTML = `
+<div class="text-center p-4 text-danger">
+Error cargando publicaciones
+</div>`;
+
+return;
+}
+
+feed.innerHTML = "";
+
+if (!posts.length) {
+
+feed.innerHTML = `
+<div class="text-center p-5 text-muted">
+No hay publicaciones
+</div>`;
+
+return;
+}
+
+posts.forEach(p => {
+
+const esMio = p.autor_id === sesion.id;
+
+const fecha =
+new Date(p.creado_a_las).toLocaleString();
+
+let media = "";
+
+if (p.archivo_url) {
+
+if (p.tipo_archivo?.startsWith("video")) {
+
+media = `
+<video
+src="${p.archivo_url}"
+controls
+class="post-media"
+style="
+max-height:650px;
+object-fit:contain;
+background:black;
+"
+></video>
+`;
+
+} else {
+
+media = `
+<img
+src="${p.archivo_url}"
+class="post-media"
+style="
+max-height:650px;
+object-fit:contain;
+background:black;
+"
+>
+`;
+}
+}
+
+const div = document.createElement("div");
+
+div.className = "custom-card";
+
+div.id = `post-${p.id}`;
+
+div.innerHTML = `
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+
+<div
+class="d-flex align-items-center gap-2"
+style="cursor:pointer"
+onclick="location.href='perfil.html?id=${p.autor_id}'"
+>
+
+<img
+src="${p.autor_foto || `https://ui-avatars.com/api/?name=${encodeURIComponent(p.autor_nombre)}&background=random`}"
+class="rounded-circle"
+width="38"
+height="38"
+style="object-fit:cover;"
+>
+
+<div>
+
+<h6 class="mb-0 fw-bold small">
+${p.autor_nombre}
+</h6>
+
+<small class="text-muted" style="font-size:10px;">
+${fecha}
+</small>
+
+</div>
+
+</div>
+
+${esMio ? `
+
+<div class="d-flex gap-2">
+
+<button
+class="btn btn-sm btn-warning"
+onclick="editarPost(${p.id})"
+>
+<i class="bi bi-pencil"></i>
+</button>
+
+<button
+class="btn btn-sm btn-danger"
+onclick="eliminarPost(${p.id})"
+>
+<i class="bi bi-trash"></i>
+</button>
+
+</div>
+
+` : ''}
+
+</div>
+
+<p style="line-height:1.6;">
+${p.contenido_texto || ''}
+</p>
+
+${media}
+`;
+
+feed.appendChild(div);
+
+});
+
+}
+
+// ─────────────────────────────────────────────────────────────
+// EDITAR POST
+// ─────────────────────────────────────────────────────────────
+
+window.editarPost = async (postId) => {
+
+const { data: post } =
+await window.supabaseClient
+.from("publicaciones")
+.select("*")
+.eq("id", postId)
+.single();
+
+if (!post) return;
+
+const nuevoTexto =
+prompt("Editar publicación:", post.contenido_texto);
+
+if (nuevoTexto === null) return;
+
+let nuevaImagen = null;
+
+let eliminarImagen = false;
+
+const seleccionarNuevo =
+confirm("¿Deseas cambiar imagen/video?");
+
+if (seleccionarNuevo) {
+
+const input = document.createElement("input");
+
+input.type = "file";
+
+input.accept = "image/*,video/*";
+
+input.onchange = async () => {
+
+nuevaImagen = input.files[0];
+
+const eliminarVieja = confirm(
+"¿Eliminar archivo anterior?"
+);
+
+if (eliminarVieja) {
+
+eliminarImagen = true;
+
+}
+
+const confirmar =
+confirm("¿Guardar cambios?");
+
+if (!confirmar) return;
+
+let archivo_url = post.archivo_url;
+
+let tipo_archivo = post.tipo_archivo;
+
+// eliminar anterior
+
+if (eliminarImagen && archivo_url) {
+
+const path =
+archivo_url.split(`/storage/v1/object/public/${BUCKET}/`)[1];
+
+if (path) {
+
+await window.supabaseClient.storage
+.from(BUCKET)
+.remove([path]);
+}
+
+archivo_url = null;
+
+tipo_archivo = null;
+}
+
+// subir nueva
+
+if (nuevaImagen) {
+
+const path =
+`posts/${Date.now()}_${nuevaImagen.name}`;
+
+await window.supabaseClient.storage
+.from(BUCKET)
+.upload(path, nuevaImagen);
+
+archivo_url =
+window.supabaseClient.storage
+.from(BUCKET)
+.getPublicUrl(path).data.publicUrl;
+
+tipo_archivo = nuevaImagen.type;
+}
+
+await window.supabaseClient
+.from("publicaciones")
+.update({
+
+contenido_texto: nuevoTexto,
+
+archivo_url,
+
+tipo_archivo
+
+})
+.eq("id", postId)
+.eq("autor_id", sesion.id);
+
+await cargarPublicaciones();
+
+};
+
+input.click();
+
+} else {
+
+const confirmar =
+confirm("¿Guardar cambios?");
+
+if (!confirmar) return;
+
+await window.supabaseClient
+.from("publicaciones")
+.update({
+
+contenido_texto: nuevoTexto
+
+})
+.eq("id", postId)
+.eq("autor_id", sesion.id);
+
+await cargarPublicaciones();
+
+}
+
+};
+
+// ─────────────────────────────────────────────────────────────
+// ELIMINAR
+// ─────────────────────────────────────────────────────────────
+
+window.eliminarPost = async (postId) => {
+
+if (!confirm("¿Eliminar publicación?")) return;
+
+const { data: post } =
+await window.supabaseClient
+.from("publicaciones")
+.select("archivo_url")
+.eq("id", postId)
+.single();
+
+if (post?.archivo_url) {
+
+const path =
+post.archivo_url
+.split(`/storage/v1/object/public/${BUCKET}/`)[1];
+
+if (path) {
+
+await window.supabaseClient.storage
+.from(BUCKET)
+.remove([path]);
+
+}
+}
+
+await window.supabaseClient
+.from("publicaciones")
+.delete()
+.eq("id", postId)
+.eq("autor_id", sesion.id);
+
+document.getElementById(`post-${postId}`)?.remove();
+
+};
+
+// ─────────────────────────────────────────────────────────────
+// LOGOUT
+// ─────────────────────────────────────────────────────────────
+
+window.logout = () => {
+
+localStorage.removeItem("sesion");
+
+window.location.href = "index.html";
+
+};
+
+// ─────────────────────────────────────────────────────────────
+// NOTIFICACIONES
+// ─────────────────────────────────────────────────────────────
+
+async function cargarNotificaciones() {
+
+const { data: notifs } =
+await window.supabaseClient
+.from('notificaciones')
+.select('*')
+.eq('usuario_id', sesion.id)
+.order('creado_a_las', { ascending: false })
+.limit(8);
+
+const badge =
+document.getElementById("badge-notificaciones");
+
+const lista =
+document.getElementById("lista-notificaciones");
+
+const unread =
+notifs?.filter(n => !n.leida).length || 0;
+
+badge.innerText = unread;
+
+unread > 0
+? badge.classList.remove("d-none")
+: badge.classList.add("d-none");
+
+lista.innerHTML = notifs?.length ?
+
+notifs.map(n => `
+<li class="p-2 small border-bottom border-secondary">
+<b>${n.emisor_nombre}</b> ${n.tipo}
+</li>
+`).join('')
+
+:
+
+'<li class="text-center p-3 small">Sin novedades</li>';
+
+}
+
+// ─────────────────────────────────────────────────────────────
+// SUGERENCIAS
+// ─────────────────────────────────────────────────────────────
+
+async function cargarSugerencias() {
+
+const { data: users } =
+await window.supabaseClient
+.from('usuarios')
+.select('id, nombre, email')
+.neq('id', sesion.id)
+.limit(5);
+
+document.getElementById("listaSugerencias").innerHTML =
+users.map(u => `
+
+<div class="d-flex align-items-center justify-content-between mb-3">
+
+<div class="d-flex align-items-center gap-2">
+
+<img
+src="https://ui-avatars.com/api/?name=${encodeURIComponent(u.nombre)}&background=random"
+class="rounded-circle"
+width="32"
+height="32"
+>
+
+<div>
+
+<div class="fw-bold" style="font-size: 12px;">
+${u.nombre}
+</div>
+
+<div class="text-muted" style="font-size: 9px;">
+${getInst(u.email)}
+</div>
+
+</div>
+
+</div>
+
+<button
+class="btn btn-sm text-gold fw-bold p-0"
+style="font-size:11px;"
+>
+Seguir
+</button>
+
+</div>
+
+`).join('');
+
+}
+
+// ─────────────────────────────────────────────────────────────
+// BUSCADOR
+// ─────────────────────────────────────────────────────────────
+
+function setupSearch() {
+
+document.getElementById('inputBusqueda').oninput =
+async (e) => {
+
+const q = e.target.value.trim();
+
+const res =
+document.getElementById('resultadosBusqueda');
+
+if (q.length < 2) {
+
+res.innerHTML = "";
+
+return;
+}
+
+const { data } =
+await window.supabaseClient
+.from('usuarios')
+.select('id,nombre')
+.ilike('nombre', `%${q}%`)
+.limit(5);
+
+res.innerHTML = data.map(u => `
+
+<div
+class="p-2 border-bottom border-secondary text-white small"
+style="cursor:pointer;"
+onclick="location.href='perfil.html?id=${u.id}'"
+>
+${u.nombre}
+</div>
+
+`).join('');
+
+};
+
+}
+
+})();
+
 </script>
 </body>
 </html>
