@@ -3,126 +3,206 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Perfil - Red UNAM</title>
+  <title>Mi Perfil — Red UNAM</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
   <style>
-    body { background-color: #121212; }
-    .nav-link#facultadNav { color: #ffc107 !important; font-weight: bold; }
-    .auth-vacia { visibility: hidden; }
-    .search-results {
-      position: absolute; top: 100%; left: 0; right: 0;
-      background: #252525; z-index: 1050; border-radius: 0 0 10px 10px;
-      max-height: 250px; overflow-y: auto; border: 1px solid #333;
+    :root {
+      --bg: #0a0c10;
+      --surface: #111318;
+      --surface2: #181c24;
+      --border: rgba(255,255,255,0.07);
+      --accent: #002f6c;
+      --gold: #c8a951;
+      --text: #e8eaf0;
+      --muted: #6b7280;
+      --radius: 14px;
     }
-    /* Perfil */
-    .perfil-header { background-color: #1e1e1e; border-radius: 0 0 20px 20px; overflow: hidden; border-bottom: 1px solid #333; }
-    .portada-color { height: 200px; background: linear-gradient(45deg, #002b5c, #0d6efd); width: 100%; }
-    .foto-perfil-contenedor { margin-top: -60px; padding-left: 30px; }
-    .foto-perfil { width: 130px; height: 130px; border: 4px solid #1e1e1e; object-fit: cover; background: #252525; }
-    .btn-edit-foto { position: absolute; bottom: 5px; right: 5px; border-radius: 50%; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; }
-    .card-social { border-radius: 12px; background-color: #1e1e1e; border: 1px solid #333; margin-bottom: 20px; }
+
+    body {
+      font-family: 'Sora', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      background-image: radial-gradient(circle at top right, rgba(0,47,108,0.15), transparent 40%);
+    }
+
+    /* Header & Navigation */
+    .nav-custom {
+      background: rgba(10,12,16,0.8);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; z-index: 1000;
+    }
+
+    /* Profile Header */
+    .profile-banner {
+      height: 220px;
+      background: linear-gradient(135deg, var(--accent), #001a3d);
+      border-radius: 0 0 24px 24px;
+      position: relative;
+    }
+
+    .avatar-wrapper {
+      position: relative;
+      margin-top: -75px;
+      display: inline-block;
+    }
+
+    .avatar-profile {
+      width: 150px; height: 150px;
+      border-radius: 50%;
+      border: 5px solid var(--bg);
+      object-fit: cover;
+      background: var(--surface2);
+    }
+
+    .btn-edit-photo {
+      position: absolute; bottom: 5px; right: 5px;
+      background: var(--gold); color: #000;
+      border-radius: 50%; width: 36px; height: 36px;
+      display: grid; place-items: center; cursor: pointer;
+      border: 3px solid var(--bg); transition: 0.2s;
+    }
+    .btn-edit-photo:hover { transform: scale(1.1); }
+
+    /* Content Cards */
+    .card-profile {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      height: 100%;
+    }
+
+    .stat-box { text-align: center; padding: 10px; }
+    .stat-value { font-family: 'DM Serif Display', serif; color: var(--gold); font-size: 1.5rem; display: block; }
+    .stat-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); }
+
+    .post-card {
+      background: var(--surface2);
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 15px;
+      border-left: 3px solid var(--accent);
+    }
+
+    /* Modal Styling */
+    .modal-content {
+      background: var(--surface);
+      border: 1px solid var(--gold);
+      border-radius: 20px;
+    }
+    .form-control {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: white;
+    }
+    .form-control:focus { background: var(--bg); color: white; border-color: var(--gold); box-shadow: none; }
   </style>
 </head>
 <body>
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow sticky-top">
-  <div class="container-fluid">
-    <a class="navbar-brand d-flex align-items-center" href="inicioRed.html">
-      <img src="images/logoUNAM.png" width="40" class="me-2">
-      <strong class="d-none d-sm-block">Red UNAM</strong>
+<nav class="nav-custom py-2">
+  <div class="container d-flex justify-content-between align-items-center">
+    <a href="inicioRed.html" class="text-decoration-none d-flex align-items-center gap-2">
+      <div style="background: var(--gold); color:black; width:30px; height:30px; border-radius:6px; display:grid; place-items:center; font-weight:bold">U</div>
+      <span class="fw-bold text-white small" style="letter-spacing:1px">RED UNAM</span>
     </a>
-
-    <div class="flex-grow-1 mx-3 position-relative" style="max-width: 400px;">
-      <div class="input-group input-group-sm">
-        <span class="input-group-text bg-dark border-0 text-white"><i class="bi bi-search"></i></span>
-        <input type="text" id="inputBusqueda" class="form-control bg-dark border-0 text-white" placeholder="Buscar en la UNAM...">
-      </div>
-      <div id="resultadosBusqueda" class="search-results shadow"></div>
-    </div>
-
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    
-    <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav me-auto align-items-center">
-        <li class="nav-item"><a class="nav-link" href="inicioRed.html">Inicio</a></li>
-        <li class="nav-item"><a class="nav-link position-relative" href="notificaciones.html">
-            <i class="bi bi-bell-fill"></i>
-            <span id="badge-notificaciones" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none">0</span>
-        </a></li>
-        <li class="nav-item"><a class="nav-link auth-vacia" href="facultad.html" id="facultadNav"></a></li>
-      </ul>
-      <div id="authArea" class="auth-vacia"></div>
+    <div class="d-flex align-items-center gap-3">
+        <a href="inicioRed.html" class="btn btn-sm btn-outline-light border-0"><i class="bi bi-house"></i></a>
+        <button onclick="logout()" class="btn btn-sm btn-danger px-3 rounded-pill" style="font-size: 11px;">SALIR</button>
     </div>
   </div>
 </nav>
 
-<div class="container mt-0 mt-md-4 mb-5">
-  <div class="perfil-header shadow-sm mb-4">
-    <div class="portada-color"></div>
-    <div class="d-flex align-items-end foto-perfil-contenedor position-relative">
-      <div class="position-relative">
-        <img src="" id="imgPerfil" class="foto-perfil rounded-circle">
-        <label for="inputFoto" class="btn btn-primary btn-edit-foto d-none" id="labelFoto">
-          <i class="bi bi-camera-fill"></i>
-        </label>
-        <input type="file" id="inputFoto" hidden accept="image/*">
-      </div>
-      <div class="ms-3 mb-2">
-        <h3 class="fw-bold mb-0 text-white" id="nombreDisplay">...</h3>
-        <p class="text-muted small mb-0" id="cuentaDisplay">Cuenta: ---</p>
-      </div>
-      <div id="areaAcciones" class="ms-auto me-4 mb-3"></div>
+<div class="container mb-5">
+  <div class="profile-banner shadow-lg"></div>
+  
+  <div class="text-center">
+    <div class="avatar-wrapper">
+      <img id="avatar-grande" src="" class="avatar-profile shadow-lg">
+      <label for="upload-photo" class="btn-edit-photo">
+        <i class="bi bi-camera-fill"></i>
+        <input type="file" id="upload-photo" hidden accept="image/*">
+      </label>
     </div>
-    <div class="px-4 py-3">
-        <p class="text-white mb-0" id="descripcionDisplay">Cargando...</p>
+    <h2 id="perfil-nombre" class="mt-3 fw-bold mb-0">Cargando...</h2>
+    <p id="perfil-correo" class="text-gold mb-2" style="color: var(--gold); font-size: 0.9rem;"></p>
+    
+    <div class="d-flex justify-content-center gap-4 my-3">
+        <div class="stat-box">
+            <span id="count-posts" class="stat-value">0</span>
+            <span class="stat-label">Publicaciones</span>
+        </div>
+        <div class="stat-box">
+            <span id="count-friends" class="stat-value">0</span>
+            <span class="stat-label">Amigos</span>
+        </div>
     </div>
+
+    <button class="btn btn-outline-light btn-sm rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#editModal">
+        <i class="bi bi-pencil-square me-2"></i>Editar Perfil
+    </button>
   </div>
 
-  <div class="row">
+  <div class="row mt-5 g-4">
     <div class="col-lg-4">
-      <div class="card card-social p-3 shadow-sm">
-        <h6 class="text-muted text-uppercase small fw-bold mb-3">Detalles Académicos</h6>
-        <div class="text-white small">
-            <p><i class="bi bi-envelope me-2 text-primary"></i> <span id="emailDisplay">...</span></p>
-            <p><i class="bi bi-mortarboard me-2 text-warning"></i> <span id="institucionDisplay">...</span></p>
-            <p><i class="bi bi-shield-check me-2 text-success"></i> Estado: <span id="estadoDisplay">...</span></p>
-            <p><i class="bi bi-eye me-2 text-info"></i> Perfil: <span id="privacidadDisplay">...</span></p>
+      <div class="card-profile">
+        <h6 class="text-uppercase small fw-bold mb-3" style="letter-spacing: 2px;">Biografía</h6>
+        <p id="perfil-bio" class="small text-muted" style="line-height: 1.6;">No has agregado una descripción aún.</p>
+        <hr class="opacity-10">
+        <div class="mb-3">
+            <label class="d-block text-muted small mb-1">Privacidad</label>
+            <span id="perfil-privacidad" class="badge bg-secondary rounded-pill">Público</span>
         </div>
-        <button class="btn btn-outline-primary btn-sm w-100 mt-2 d-none" id="btnAbrirModal" data-bs-toggle="modal" data-bs-target="#modalEditar">Editar Perfil</button>
+        <div id="toast-container"></div>
       </div>
     </div>
+
     <div class="col-lg-8">
-      <h6 class="text-muted text-uppercase small fw-bold mb-3">Publicaciones</h6>
-      <div id="feedUsuario"></div>
+      <div class="card-profile">
+        <h6 class="text-uppercase small fw-bold mb-4" style="letter-spacing: 2px;">Mis Publicaciones</h6>
+        <div id="feedUsuario">
+            <div class="text-center p-5 text-muted small">Cargando actividad...</div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
 
-<div class="modal fade" id="modalEditar" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content bg-dark text-white border-secondary">
-      <div class="modal-header border-secondary">
-        <h5 class="modal-title">Editar Perfil</h5>
+<div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header border-0">
+        <h5 class="modal-title fw-bold">Actualizar Datos</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
-        <div class="mb-3">
-          <label class="form-label small text-muted">Descripción</label>
-          <textarea id="editDescripcion" class="form-control bg-transparent text-white border-secondary" rows="4"></textarea>
-        </div>
-        <div class="mb-3">
-          <label class="form-label small text-muted">Privacidad</label>
-          <select id="editPrivacidad" class="form-select bg-transparent text-white border-secondary">
-              <option value="Público">Público</option>
-              <option value="Privado">Privado</option>
-          </select>
-        </div>
-      </div>
-      <div class="modal-footer border-secondary">
-        <button type="button" class="btn btn-primary w-100 fw-bold" id="btnGuardar">Guardar Cambios</button>
+        <form id="formPerfil">
+          <div class="mb-3">
+            <label class="form-label small">Nombre Completo</label>
+            <input type="text" id="editNombre" class="form-control">
+          </div>
+          <div class="mb-3">
+            <label class="form-label small">Biografía / Descripción</label>
+            <textarea id="editBio" class="form-control" rows="3"></textarea>
+          </div>
+          <div class="mb-3">
+            <label class="form-label small">Privacidad de cuenta</label>
+            <select id="editPrivacidad" class="form-control">
+                <option value="publico">Público</option>
+                <option value="privado">Privado</option>
+            </select>
+          </div>
+          <div class="text-end mt-4">
+            <button type="button" class="btn btn-link text-white text-decoration-none me-3" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-warning fw-bold px-4">Guardar Cambios</button>
+          </div>
+        </form>
       </div>
     </div>
   </div>
@@ -134,116 +214,128 @@
 
 <script>
   (function() {
-    const sesion = JSON.parse(localStorage.getItem("sesion"));
-    const urlParams = new URLSearchParams(window.location.search);
-    const perfilId = urlParams.get('id') || sesion?.id;
+    let sesion = JSON.parse(localStorage.getItem("sesion"));
+    const AVATAR_BUCKET = 'multimedia'; // Ajustar según tu bucket de Supabase
 
-    // --- 🛠 LÓGICA DE INSTITUCIÓN POR CORREO ---
-    function obtenerInstitucion(email) {
-        if (!email) return "Comunidad UNAM";
-        if (email.endsWith('@aragon.unam.mx')) return "FES Aragón";
-        if (email.endsWith('@ingenieria.unam.mx')) return "Facultad de Ingeniería";
-        if (email.endsWith('@comunidad.unam.mx')) return "UNAM Central";
-        return "Comunidad UNAM";
+    if (!sesion) { window.location.href = "index.html"; return; }
+
+    async function init() {
+        renderPerfil();
+        cargarMisPosts();
+        
+        // Pre-llenar modal
+        document.getElementById("editNombre").value = sesion.nombre;
+        document.getElementById("editBio").value = sesion.bio || "";
+        document.getElementById("editPrivacidad").value = sesion.privacidad || "publico";
     }
 
-    async function inicializar() {
-      if (!sesion) { window.location.replace("index.html"); return; }
-
-      // 1. Obtener datos del perfil que estamos viendo
-      const { data: user } = await window.supabaseClient.from('usuarios').select('*').eq('id', perfilId).single();
-      if (!user) return;
-
-      // 2. Configurar Navbar basado en la sesión del usuario logueado
-      configurarNavbar(sesion);
-      
-      // 3. Renderizar el Perfil
-      const instPerfil = obtenerInstitucion(user.email);
-      document.getElementById("nombreDisplay").innerText = user.nombre;
-      document.getElementById("cuentaDisplay").innerText = `Cuenta: ${user.numero_cuenta}`;
-      document.getElementById("emailDisplay").innerText = user.email;
-      document.getElementById("institucionDisplay").innerText = instPerfil;
-      document.getElementById("descripcionDisplay").innerText = user.descripcion || "Sin descripción.";
-      document.getElementById("estadoDisplay").innerText = user.estado;
-      document.getElementById("privacidadDisplay").innerText = user.privacidad;
-      
-      const avatarDefault = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.nombre)}&background=random`;
-      document.getElementById("imgPerfil").src = user.foto_perfil || avatarDefault;
-
-      if (perfilId === sesion.id) {
-        document.getElementById("labelFoto").classList.remove("d-none");
-        document.getElementById("btnAbrirModal").classList.remove("d-none");
-        document.getElementById("areaAcciones").innerHTML = `<button class="btn btn-outline-light btn-sm rounded-pill fw-bold px-4" data-bs-toggle="modal" data-bs-target="#modalEditar">Configurar Perfil</button>`;
-        document.getElementById("editDescripcion").value = user.descripcion || "";
-        document.getElementById("editPrivacidad").value = user.privacidad;
-      } else {
-        document.getElementById("areaAcciones").innerHTML = `<button class="btn btn-primary btn-sm rounded-pill fw-bold px-4" onclick="enviarSolicitud('${user.id}')">Seguir</button>`;
-      }
-
-      cargarPosts(user.id, user.nombre);
+    function renderPerfil() {
+        document.getElementById("perfil-nombre").innerText = sesion.nombre;
+        document.getElementById("perfil-correo").innerText = sesion.email;
+        document.getElementById("perfil-bio").innerText = sesion.bio || "Agrega una biografía para que otros te conozcan.";
+        document.getElementById("perfil-privacidad").innerText = (sesion.privacidad || 'publico').toUpperCase();
+        
+        const fotoURL = sesion.foto_perfil || `https://ui-avatars.com/api/?name=${encodeURIComponent(sesion.nombre)}&background=c8a951&color=000&size=150`;
+        document.getElementById("avatar-grande").src = fotoURL;
     }
 
-    function configurarNavbar(s) {
-      const miInst = obtenerInstitucion(s.email);
-      
-      // Botón Facultad Nav
-      const fNav = document.getElementById("facultadNav");
-      fNav.innerHTML = `🎓 ${miInst}`;
-      fNav.classList.remove("auth-vacia");
+    async function cargarMisPosts() {
+        const { data: posts, error } = await window.supabaseClient
+            .from('publicaciones')
+            .select('*')
+            .eq('autor_id', sesion.id)
+            .order('creado_a_las', { ascending: false });
 
-      // Dropdown Usuario
-      const avatarNav = `https://ui-avatars.com/api/?name=${encodeURIComponent(s.nombre)}&background=0D6EFD&color=fff`;
-      document.getElementById("authArea").innerHTML = `
-        <div class="dropdown">
-          <button class="btn btn-light btn-sm dropdown-toggle fw-bold" data-bs-toggle="dropdown">
-            ${s.nombre.split(' ')[0]}
-          </button>
-          <ul class="dropdown-menu dropdown-menu-end shadow p-3">
-            <li class="text-center mb-2">
-              <img src="${avatarNav}" class="rounded-circle mb-2" width="55">
-              <div class="fw-bold text-primary small">${s.nombre}</div>
-              <div class="text-muted" style="font-size: 0.7rem;">${miInst}</div>
-            </li>
-            <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item text-center fw-bold border rounded mb-2" href="perfil.html">Ver Perfil</a></li>
-            <li><button class="dropdown-item text-danger text-center fw-bold" onclick="localStorage.removeItem('sesion'); location.href='index.html'">Cerrar sesión</button></li>
-          </ul>
-        </div>`;
-      document.getElementById("authArea").classList.remove("auth-vacia");
+        const feed = document.getElementById("feedUsuario");
+        document.getElementById("count-posts").innerText = posts?.length || 0;
 
-      // Buscador
-      document.getElementById('inputBusqueda').addEventListener('input', async (e) => {
-          const q = e.target.value.trim();
-          const res = document.getElementById('resultadosBusqueda');
-          if (q.length < 2) { res.innerHTML = ""; return; }
-          const { data } = await window.supabaseClient.from('usuarios').select('id, nombre').ilike('nombre', `%${q}%`).limit(5);
-          res.innerHTML = data.map(u => `<div class="p-2 border-bottom border-secondary text-white small cursor-pointer" onclick="location.href='perfil.html?id=${u.id}'">${u.nombre}</div>`).join('');
-      });
+        if (error || !posts.length) {
+            feed.innerHTML = `<div class="text-center p-4 text-muted small">No has publicado nada todavía.</div>`;
+            return;
+        }
+
+        feed.innerHTML = posts.map(p => `
+            <div class="post-card">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <small class="text-gold fw-bold" style="font-size: 10px;">${new Date(p.creado_a_las).toLocaleDateString()}</small>
+                    <button class="btn btn-sm text-danger p-0 border-0" onclick="borrarPost(${p.id})"><i class="bi bi-trash"></i></button>
+                </div>
+                <p class="small mb-0">${p.contenido_texto || ''}</p>
+                ${p.archivo_url ? `<img src="${p.archivo_url}" class="img-fluid rounded mt-2 shadow-sm">` : ''}
+            </div>
+        `).join('');
     }
 
-    // Funciones de carga de posts y notificaciones... (omitidas por brevedad pero deben estar en tu código final)
-    async function cargarPosts(uid, nombre) {
-      const { data: posts } = await window.supabaseClient.from('publicaciones').select('*').eq('autor_id', uid).order('creado_a_las', { ascending: false });
-      const feed = document.getElementById("feedUsuario");
-      feed.innerHTML = posts?.length ? posts.map(p => `
-        <div class="card card-social p-3">
-          <div class="d-flex align-items-center mb-2">
-              <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(nombre)}&background=random" class="rounded-circle me-2" width="30">
-              <small class="text-white fw-bold">${nombre}</small>
-          </div>
-          <p class="text-white mb-2">${p.contenido_texto || ''}</p>
-          ${p.archivo_url ? `<img src="${p.archivo_url}" class="rounded w-100">` : ''}
-        </div>`).join('') : '<p class="text-muted text-center p-4">Sin actividad.</p>';
-    }
+    // --- LOGICA DE ACTUALIZACIÓN (De editperfil.html y perfil.html) ---
+    document.getElementById("formPerfil").onsubmit = async (e) => {
+        e.preventDefault();
+        const btn = e.target.querySelector('button[type="submit"]');
+        btn.disabled = true;
 
-    document.getElementById("btnGuardar").onclick = async () => {
-        const desc = document.getElementById("editDescripcion").value;
-        const priv = document.getElementById("editPrivacidad").value;
-        await window.supabaseClient.from('usuarios').update({ descripcion: desc, privacidad: priv }).eq('id', sesion.id);
-        location.reload();
+        const upData = {
+            nombre: document.getElementById("editNombre").value,
+            bio: document.getElementById("editBio").value,
+            privacidad: document.getElementById("editPrivacidad").value
+        };
+
+        const { error } = await window.supabaseClient
+            .from('usuarios')
+            .update(upData)
+            .eq('id', sesion.id);
+
+        if (!error) {
+            // Actualizar local y UI
+            sesion = { ...sesion, ...upData };
+            localStorage.setItem("sesion", JSON.stringify(sesion));
+            renderPerfil();
+            bootstrap.Modal.getInstance(document.getElementById('editModal')).hide();
+        }
+        btn.disabled = false;
     };
 
-    inicializar();
+    // --- SUBIDA DE FOTO (De perfil1.html) ---
+    document.getElementById("upload-photo").onchange = async function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        try {
+            const ext = file.name.split('.').pop();
+            const path = `avatars/${sesion.id}_${Date.now()}.${ext}`;
+            
+            const { data, error } = await window.supabaseClient.storage
+                .from(AVATAR_BUCKET)
+                .upload(path, file);
+
+            if (error) throw error;
+
+            const { data: urlData } = window.supabaseClient.storage
+                .from(AVATAR_BUCKET).getPublicUrl(data.path);
+
+            const fotoURL = urlData.publicUrl;
+
+            // Guardar en DB
+            await window.supabaseClient.from('usuarios').update({ foto_perfil: fotoURL }).eq('id', sesion.id);
+
+            sesion.foto_perfil = fotoURL;
+            localStorage.setItem("sesion", JSON.stringify(sesion));
+            document.getElementById("avatar-grande").src = fotoURL;
+        } catch (err) {
+            alert("Error al subir foto: " + err.message);
+        }
+    };
+
+    window.borrarPost = async (id) => {
+        if (!confirm("¿Eliminar publicación?")) return;
+        await window.supabaseClient.from('publicaciones').delete().eq('id', id);
+        cargarMisPosts();
+    };
+
+    window.logout = () => {
+        localStorage.removeItem("sesion");
+        window.location.href = "index.html";
+    };
+
+    init();
   })();
 </script>
 </body>
