@@ -1,0 +1,108 @@
+body {
+  height: 100vh;
+  background: linear-gradient(75deg, #1689fd, #8ec4e7) !important;
+}
+
+.navbar {
+  background-color: #003366 !important;
+}
+
+.logo-navbar {
+  height: 40px;
+  width: auto;
+}
+
+.registro-card {
+  backdrop-filter: blur(5px);
+  width: 100%;
+  max-width: 400px;
+  border-radius: 15px;
+}
+
+input {
+  border-radius: 10px !important;
+}
+
+button {
+  border-radius: 10px !important;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+button:hover {
+  background-color: #002244 !important;
+}
+
+#mensaje {
+  font-weight: bold;
+}
+
+.modal-content {
+  background: transparent;
+  border: none;
+}
+
+.modal-backdrop.show {
+  opacity: 0.8;
+}
+
+.login-card {
+  border-radius: 20px;
+  background: #ffffff !important;
+  color: #000 !important;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  padding: 20px;
+}
+.login-card .form-control {
+  background-color: #ffffff !important;
+  color: #000 !important;
+  border-radius: 10px;
+  border: 1px solid #ccc !important;
+  padding: 10px;
+}
+
+.login-card .form-control::placeholder {
+  color: #888;
+}
+
+.form-control.is-invalid {
+  border: 2px solid #dc3545 !important;
+}
+
+.form-control.is-valid {
+  border: 2px solid #198754 !important;
+}
+
+.login-card .btn-primary {
+  border-radius: 10px;
+  font-weight: bold;
+  background-color: #0d6efd;
+  border: none;
+}
+
+.login-card .btn-primary:hover {
+  background-color: #0b5ed7;
+}
+
+.login-card p {
+  color: #555;
+}
+
+.perfil-dropdown {
+  min-width: 260px;
+  max-width: 320px;
+  white-space: normal;
+  word-break: break-word;
+
+  right: 0 !important;
+  left: auto !important;
+}
+
+#authArea {
+  display: flex;
+  align-items: center;
+}
+
+#authArea .dropdown {
+  margin-right: 100px;
+}

@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="es" data-bs-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Iniciar Sesión - Red UNAM</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="style/styles.css">
+  <style>
+    body, html { 
+      height: 100%; 
+      margin: 0;
+      overflow: hidden; 
+      background-color: #121212;
+    }
+    .main-wrapper { height: calc(100vh - 56px); }
+    .registro-card { 
+      border-radius: 15px; 
+      border: none; 
+      background-color: #1e1e1e;
+      max-width: 400px; 
+      width: 100%; 
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    .carousel-item { padding: 40px; }
+    .carousel-item img {
+      height: 100%;
+      width: 100%;
+      object-fit: cover;
+      border-radius: 20px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+    .right-side { display: flex; justify-content: center; align-items: center; }
+    .carousel-caption { bottom: 60px; padding: 15px; }
+  </style>
+</head>
+<body>
+
+<nav class="navbar navbar-dark bg-primary px-3 shadow">
+  <span class="navbar-brand mb-0 h1 fw-bold">Red UNAM</span>
+  <div class="ms-auto">
+    <img src="images/logoUNAM.png" alt="Logo" width="40">
+  </div>
+</nav>
+
+<div class="container-fluid main-wrapper p-0">
+  <div class="row g-0 h-100">
+    
+    <!-- Carrusel Visual -->
+    <div class="col-lg-7 d-none d-lg-block h-100">
+      <div id="carouselUnam" class="carousel slide carousel-fade h-100" data-bs-ride="carousel">
+        <div class="carousel-inner h-100">
+          <div class="carousel-item active h-100" data-bs-interval="2500">
+            <img src="images/cu.jpg" class="d-block" alt="CU">
+            <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-75 rounded">
+              <h5>Ciudad Universitaria</h5>
+              <p class="small">Patrimonio Cultural de la Humanidad</p>
+            </div>
+          </div>
+
+          <!-- FES (Todas) -->
+          <div class="carousel-item h-100" data-bs-interval="2500">
+            <img src="images/fes_aragon.jpg" class="d-block" alt="FES Aragón">
+            <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-75 rounded"><h5>FES Aragón</h5></div>
+          </div>
+          <div class="carousel-item h-100" data-bs-interval="2500">
+            <img src="images/fes_acatlan.jpg" class="d-block" alt="FES Acatlán">
+            <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-75 rounded"><h5>FES Acatlán</h5></div>
+          </div>
+          <div class="carousel-item h-100" data-bs-interval="2500">
+            <img src="images/fes_iztacala.jpg" class="d-block" alt="FES Iztacala">
+            <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-75 rounded"><h5>FES Iztacala</h5></div>
+          </div>
+          <div class="carousel-item h-100" data-bs-interval="2500">
+            <img src="images/fes_cuautitlan.jpg" class="d-block" alt="FES Cuautitlán">
+            <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-75 rounded"><h5>FES Cuautitlán</h5></div>
+          </div>
+          <div class="carousel-item h-100" data-bs-interval="2500">
+            <img src="images/fes_zaragoza.jpg" class="d-block" alt="FES Zaragoza">
+            <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-75 rounded"><h5>FES Zaragoza</h5></div>
+          </div>
+
+          <!-- ENES (Todas) -->
+          <div class="carousel-item h-100" data-bs-interval="2500">
+            <img src="images/enes_morelia.jpg" class="d-block" alt="ENES Morelia">
+            <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-75 rounded"><h5>ENES Morelia</h5></div>
+          </div>
+          <div class="carousel-item h-100" data-bs-interval="2500">
+            <img src="images/enes_leon.jpg" class="d-block" alt="ENES León">
+            <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-75 rounded"><h5>ENES León</h5></div>
+          </div>
+          <div class="carousel-item h-100" data-bs-interval="2500">
+            <img src="images/enes_merida.jpg" class="d-block" alt="ENES Mérida">
+            <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-75 rounded"><h5>ENES Mérida</h5></div>
+          </div>
+          <div class="carousel-item h-100" data-bs-interval="2500">
+            <img src="images/enes_juriquilla.jpg" class="d-block" alt="ENES Juriquilla">
+            <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-75 rounded"><h5>ENES Juriquilla</h5></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Formulario de Login -->
+    <div class="col-lg-5 right-side px-4">
+      <div class="card p-4 registro-card">
+        <div class="text-center mb-4">
+            <img src="images/logoUNAM.png" alt="Logo UNAM" width="60" class="mb-2">
+            <h3 class="fw-bold">Red UNAM</h3>
+            <p class="text-muted small">Inicia sesión con tu cuenta institucional</p>
+        </div>
+
+        <form id="formLogin">
+          <div class="mb-3">
+            <label class="form-label small">Correo o Número de Cuenta</label>
+            <input type="text" class="form-control bg-dark border-secondary text-white" id="email" placeholder="Usuario o 9 dígitos" required>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label small">Contraseña</label>
+            <div class="input-group">
+              <input type="password" class="form-control bg-dark border-secondary text-white" id="password" placeholder="••••••••" required>
+              <button class="btn btn-outline-secondary border-secondary" type="button" id="btnTogglePassword">
+                <i class="bi bi-eye" id="iconEye"></i>
+              </button>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary w-100 fw-bold py-2 shadow-sm">Entrar</button>
+        </form>
+
+        <p class="text-center mt-4 small">
+          ¿No tienes cuenta? 
+          <a href="registro.html" class="link-primary text-decoration-none fw-bold">Regístrate aquí</a>
+        </p>
+
+        <div id="mensaje" class="mt-3 text-center"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/conexion.js"></script>
+
+<script>
+const form = document.getElementById("formLogin");
+const mensaje = document.getElementById("mensaje");
+const btnTogglePassword = document.getElementById("btnTogglePassword");
+const passwordEl = document.getElementById("password");
+const iconEye = document.getElementById("iconEye");
+
+// Lógica Ver/Ocultar
+btnTogglePassword.addEventListener("click", () => {
+    const isPassword = passwordEl.type === "password";
+    passwordEl.type = isPassword ? "text" : "password";
+    iconEye.classList.toggle("bi-eye");
+    iconEye.classList.toggle("bi-eye-slash");
+});
+
+// Login con Supabase Auth
+form.addEventListener("submit", async function(e) {
+  e.preventDefault();
+  const inputEl = document.getElementById("email");
+  const inputVal = inputEl.value.trim();
+  const passwordVal = passwordEl.value;
+
+  mensaje.innerHTML = "";
+  [inputEl, passwordEl].forEach(i => i.classList.remove("is-invalid"));
+
+  try {
+    let emailParaAuth = inputVal;
+
+    // Si el usuario ingresó número de cuenta (9 dígitos), buscamos su correo
+    if (/^\d{9}$/.test(inputVal)) {
+      const { data: usuario, error: errBusqueda } = await window.supabaseClient
+        .from('usuarios')
+        .select('email')
+        .eq('numero_cuenta', inputVal)
+        .single();
+
+      if (errBusqueda || !usuario) throw new Error("Número de cuenta no registrado.");
+      emailParaAuth = usuario.email;
+    }
+
+    // Intento de login real en Supabase Auth
+    const { data: authData, error: authError } = await window.supabaseClient.auth.signInWithPassword({
+      email: emailParaAuth,
+      password: passwordVal
+    });
+
+    if (authError) throw new Error("Correo o contraseña incorrectos.");
+
+    // Traemos los datos extra del perfil para el localStorage
+    const { data: perfil, error: perfilError } = await window.supabaseClient
+      .from('usuarios')
+      .select('*')
+      .eq('id', authData.user.id)
+      .single();
+
+    if (perfilError) throw perfilError;
+
+    // Guardar sesión local
+    localStorage.setItem("sesion", JSON.stringify({
+      id: perfil.id,
+      nombre: perfil.nombre,
+      email: perfil.email,
+      cuenta: perfil.numero_cuenta
+    }));
+
+    mensaje.innerHTML = `<div class="alert alert-success py-2 small">¡Bienvenido, ${perfil.nombre}!</div>`;
+    setTimeout(() => { window.location.href = "inicioRed.html"; }, 1000);
+
+  } catch (err) {
+    [inputEl, passwordEl].forEach(i => i.classList.add("is-invalid"));
+    mensaje.innerHTML = `<div class="alert alert-danger py-2 small">${err.message}</div>`;
+  }
+});
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

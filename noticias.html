@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="es" data-bs-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Red UNAM - Inicio</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="style/styles.css">
+  <style>
+    .nav-link#facultadNav { color: #ffc107 !important; font-weight: bold; }
+    .dropdown-menu { min-width: 280px; }
+    .auth-vacia { visibility: hidden; }
+  </style>
+</head>
+<body>
+
+<!-- 🔵 NAVBAR -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow">
+  <div class="container-fluid">
+    <a class="navbar-brand d-flex align-items-center" href="inicioRed.html">
+      <img src="images/logoUNAM.png" width="45" class="me-2">
+      <strong>Red UNAM</strong>
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item"><a class="nav-link active" href="inicioRed.html">Inicio</a></li>
+        <li class="nav-item"><a class="nav-link active" href="noticias.html">Noticias</a></li>
+        <li class="nav-item"><a class="nav-link active" href="grupos.html">Grupos</a></li>
+        <li class="nav-item">
+          <a class="nav-link auth-vacia" href="facultad.html" id="facultadNav"></a>
+        </li>
+      </ul>
+      <div id="authArea" class="auth-vacia"></div>
+    </div>
+  </div>
+</nav>
+
+<div class="container mt-5 text-center">
+  <h1>Bienvenido a Red UNAM</h1>
+  <p class="lead">Tu comunidad universitaria en un solo lugar.</p>
+</div>
+
+<div class="container mt-4 mb-5">
+  <h3 class="text-center mb-3">Gaceta UNAM</h3>
+  <div class="ratio ratio-16x9 border rounded shadow bg-light">
+    <iframe src="https://www.gaceta.unam.mx/" style="border:0;" loading="lazy"></iframe>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+  (function() {
+    // 1. Mapeo de respaldo para evitar el "undefined"
+    const institucionesMap = {
+      //FES
+      "@aragon.unam.mx": "FES Aragón",
+      "@iztacala.unam.mx": "FES Iztacala",
+      "@acatlan.unam.mx": "FES Acatlán",
+      "@cuautitlan.unam.mx": "FES Cuautitlán",
+      "@zaragoza.unam.mx": "FES Zaragoza",
+
+      //Facultades en CU
+      "@arquitectura.unam.mx": "Facultad de Arquitectura",
+      "@fad.unam.mx": "Facultad de Artes y Diseño",
+      "@ciencias.unam.mx": "Facultad de Ciencias",
+      "@politicas.unam.mx": "Facultad de Ciencias Políticas y Sociales",
+      "@fca.unam.mx": "Facultad de Contaduría y Administración",
+      "@derecho.unam.mx": "Facultad de Derecho",
+      "@economia.unam.mx": "Facultad de Economía",
+      "@filos.unam.mx": "Facultad de Filosofía y Letras",
+      "@ingenieria.unam.mx": "Facultad de Ingeniería",
+      "@facmed.unam.mx": "Facultad de Medicina",
+      "@fmvz.unam.mx": "Facultad de Medicina Veterinaria y Zootecnia",
+      "@musica.unam.mx": "Facultad de Música",
+      "@odontologia.unam.mx": "Facultad de Odontología",
+      "@psicologia.unam.mx": "Facultad de Psicología",
+      "@quimica.unam.mx": "Facultad de Química",
+
+      //ENES
+      "@enes.morelia.unam.mx": "ENES Morelia",
+      "@enes.leon.unam.mx": "ENES León",
+      "@enes.juriquilla.unam.mx": "ENES Juriquilla",
+      "@emes.merida.unam.mx": "ENES Mérida",
+      "@unam.mx": "Comunidad UNAM"
+    };
+
+    function obtenerInstitucion(sesion) {
+      // Si ya existe en la sesión, la usamos
+      if (sesion.institucion && sesion.institucion !== "undefined") return sesion.institucion;
+      
+      // Si no existe, la calculamos por el término del correo
+      const correo = sesion.email ? sesion.email.toLowerCase() : "";
+      const dominios = Object.keys(institucionesMap).sort((a, b) => b.length - a.length);
+      
+      for (const dominio of dominios) {
+        if (correo.endsWith(dominio)) return institucionesMap[dominio];
+      }
+      return "Comunidad UNAM";
+    }
+
+    function cargarInterfaz() {
+      const authArea = document.getElementById("authArea");
+      const facultadNav = document.getElementById("facultadNav");
+      const sesionData = localStorage.getItem("sesion");
+
+      if (!sesionData) {
+        window.location.replace("index.html");
+        return;
+      }
+
+      const sesion = JSON.parse(sesionData);
+      // Validamos la institución antes de mostrarla
+      const miInstitucion = obtenerInstitucion(sesion);
+
+      if (facultadNav) {
+        facultadNav.innerHTML = `🎓 ${miInstitucion}`;
+        facultadNav.classList.remove("auth-vacia");
+      }
+
+      if (authArea) {
+        authArea.innerHTML = `
+          <div class="dropdown">
+            <button class="btn btn-light btn-sm dropdown-toggle fw-bold" data-bs-toggle="dropdown">
+              ${sesion.nombre ? sesion.nombre.split(' ')[0] : 'Usuario'}
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end shadow p-3">
+              <li class="text-center mb-2">
+                <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(sesion.nombre)}&background=0D6EFD&color=fff" 
+                     class="rounded-circle mb-2" width="55">
+                <div class="fw-bold text-primary">${sesion.nombre}</div>
+                <div class="small text-muted mt-1" style="word-break: break-all;">${sesion.email}</div>
+                <div class="fw-bold small text-info mt-1">${miInstitucion}</div>
+              </li>
+              <li>
+                <a class="dropdown-item text-center fw-bold mt-2 border rounded" href="perfil.html">
+                  Ver Perfil
+                </a>
+              </li>
+              <li><hr class="dropdown-divider"></li>
+              <li>
+                <button class="dropdown-item text-danger text-center fw-bold" id="logoutBtn">
+                  Cerrar sesión
+                </button>
+              </li>
+            </ul>
+          </div>`;
+        
+        authArea.classList.remove("auth-vacia");
+
+        document.getElementById("logoutBtn").onclick = function() {
+          localStorage.removeItem("sesion");
+          window.location.replace("index.html");
+        };
+      }
+    }
+
+    window.addEventListener('pageshow', function(event) {
+      if (event.persisted) {
+        window.location.reload();
+      } else {
+        cargarInterfaz();
+      }
+    });
+
+    cargarInterfaz();
+  })();
+</script>
+</body>
+</html>

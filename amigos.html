@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="es" data-bs-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Amigos - Red UNAM</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <style>
+    body { background-color: #121212; }
+    .nav-link#facultadNav { color: #ffc107 !important; font-weight: bold; }
+    .auth-vacia { visibility: hidden; }
+    .card-amigo { 
+        background-color: #1e1e1e; border: 1px solid #333; border-radius: 15px; transition: 0.3s;
+    }
+    .card-amigo:hover { transform: translateY(-5px); background-color: #252525; }
+    .img-amigo { width: 80px; height: 80px; object-fit: cover; border: 3px solid #0d6efd; }
+    .badge-comun { font-size: 0.7rem; background-color: rgba(13, 110, 253, 0.2); color: #0d6efd; border: 1px solid #0d6efd; }
+  </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow sticky-top">
+  <div class="container-fluid">
+    <a class="navbar-brand d-flex align-items-center" href="inicioRed.html">
+      <img src="images/logoUNAM.png" width="40" class="me-2">
+      <strong>Red UNAM</strong>
+    </a>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item"><a class="nav-link" href="inicioRed.html">Inicio</a></li>
+        <li class="nav-item"><a class="nav-link active" href="amigos.html"><i class="bi bi-people-fill"></i></a></li>
+        <li class="nav-item"><a class="nav-link" href="notificaciones.html"><i class="bi bi-bell-fill"></i></a></li>
+        <li class="nav-item"><a class="nav-link auth-vacia" href="facultad.html" id="facultadNav"></a></li>
+      </ul>
+      <div id="authArea" class="auth-vacia"></div>
+    </div>
+  </div>
+</nav>
+
+<div class="container mt-4">
+  <div class="row">
+    
+    <div class="col-12 mb-5" id="seccionSolicitudes" style="display: none;">
+      <h5 class="text-white fw-bold mb-3"><i class="bi bi-person-plus-fill me-2 text-warning"></i>Solicitudes de amistad</h5>
+      <div class="row" id="contenedorSolicitudes"></div>
+      <hr class="border-secondary mt-4">
+    </div>
+
+    <div class="col-lg-8">
+      <h5 class="text-white fw-bold mb-3">Mis Amigos (<span id="countAmigos">0</span>)</h5>
+      <div class="row" id="contenedorAmigos">
+          <div class="text-center p-5 text-muted">Cargando amigos...</div>
+      </div>
+    </div>
+
+    <div class="col-lg-4">
+      <h5 class="text-white fw-bold mb-3">Personas que quizá conozcas</h5>
+      <div id="contenedorSugerencias"></div>
+    </div>
+
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/conexion.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+  (function() {
+    const sesion = JSON.parse(localStorage.getItem("sesion"));
+    let misAmigosIds = [];
+
+    function obtenerInstitucion(email) {
+        if (!email) return "Comunidad UNAM";
+        if (email.endsWith('@aragon.unam.mx')) return "FES Aragón";
+        if (email.endsWith('@ingenieria.unam.mx')) return "Facultad de Ingeniería";
+        return "UNAM Central";
+    }
+
+    // --- 🤝 LÓGICA DE AMISTAD ---
+    async function cargarTodo() {
+        if (!sesion) return;
+        
+        // 1. Obtener mis amigos (asumiendo tabla 'amistades' con campos: user_id, amigo_id, estado)
+        const { data: amistades } = await window.supabaseClient
+            .from('amistades')
+            .select('amigo_id, usuarios!amigo_id(*)')
+            .eq('user_id', sesion.id)
+            .eq('estado', 'aceptado');
+        
+        misAmigosIds = amistades?.map(a => a.amigo_id) || [];
+        renderAmigos(amistades);
+
+        // 2. Obtener solicitudes pendientes
+        const { data: solicitudes } = await window.supabaseClient
+            .from('notificaciones')
+            .select('*')
+            .eq('usuario_id', sesion.id)
+            .eq('tipo', 'te envió una solicitud')
+            .eq('leida', false);
+        
+        renderSolicitudes(solicitudes);
+
+        // 3. Sugerencias (Usuarios que no son mis amigos)
+        const { data: sugerencias } = await window.supabaseClient
+            .from('usuarios')
+            .select('*')
+            .neq('id', sesion.id)
+            .limit(10);
+        
+        const filtradas = sugerencias.filter(u => !misAmigosIds.includes(u.id));
+        renderSugerencias(filtradas);
+    }
+
+    function renderAmigos(lista) {
+        const cont = document.getElementById("contenedorAmigos");
+        document.getElementById("countAmigos").innerText = lista?.length || 0;
+        
+        if(!lista?.length) {
+            cont.innerHTML = '<p class="text-muted">Aún no tienes amigos agregados.</p>';
+            return;
+        }
+
+        cont.innerHTML = lista.map(a => `
+            <div class="col-md-6 mb-3">
+                <div class="card card-amigo p-3 d-flex flex-row align-items-center">
+                    <img src="${a.usuarios.foto_perfil || 'https://ui-avatars.com/api/?name='+a.usuarios.nombre}" class="rounded-circle img-amigo me-3">
+                    <div class="overflow-hidden">
+                        <h6 class="text-white mb-0 text-truncate">${a.usuarios.nombre}</h6>
+                        <small class="text-primary d-block">${obtenerInstitucion(a.usuarios.email)}</small>
+                        <button class="btn btn-sm btn-outline-danger border-0 p-0 mt-1" onclick="eliminarAmigo('${a.amigo_id}')">Eliminar</button>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function renderSolicitudes(lista) {
+        if (!lista?.length) return;
+        document.getElementById("seccionSolicitudes").style.display = "block";
+        const cont = document.getElementById("contenedorSolicitudes");
+        
+        cont.innerHTML = lista.map(s => `
+            <div class="col-md-4 mb-2">
+                <div class="card bg-dark border-primary p-3">
+                    <p class="small text-white mb-2"><b>${s.emisor_nombre}</b> quiere ser tu amigo</p>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-primary btn-sm w-100" onclick="aceptarAmigo('${s.emisor_id}', '${s.id}')">Aceptar</button>
+                        <button class="btn btn-outline-secondary btn-sm w-100" onclick="rechazarSolicitud('${s.id}')">No</button>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    async function renderSugerencias(lista) {
+        const cont = document.getElementById("contenedorSugerencias");
+        cont.innerHTML = lista.map(u => {
+            // Lógica simple de amigos en común (Simulada para el ejemplo)
+            const comun = Math.floor(Math.random() * 5); // Aquí iría una query comparando listas de amigos
+            return `
+                <div class="d-flex align-items-center mb-3 p-2 rounded hover-effect" style="background: #1a1a1a;">
+                    <img src="https://ui-avatars.com/api/?name=${u.nombre}" class="rounded-circle me-3" width="45">
+                    <div class="flex-grow-1">
+                        <h6 class="text-white mb-0 small fw-bold">${u.nombre}</h6>
+                        <span class="badge badge-comun">${comun} amigos en común</span>
+                        <small class="text-muted d-block" style="font-size:0.7rem">${obtenerInstitucion(u.email)}</small>
+                    </div>
+                    <button class="btn btn-primary btn-sm rounded-pill" onclick="enviarSolicitud('${u.id}')"><i class="bi bi-plus"></i></button>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // --- 🚀 ACCIONES ---
+    window.aceptarAmigo = async (amigoId, notifId) => {
+        // 1. Insertar en tabla amistades (ambas direcciones para facilitar queries)
+        await window.supabaseClient.from('amistades').insert([
+            { user_id: sesion.id, amigo_id: amigoId, estado: 'aceptado' },
+            { user_id: amigoId, amigo_id: sesion.id, estado: 'aceptado' }
+        ]);
+        // 2. Marcar notificación como leída
+        await window.supabaseClient.from('notificaciones').update({ leida: true }).eq('id', notifId);
+        location.reload();
+    };
+
+    window.enviarSolicitud = async (receptorId) => {
+        await window.supabaseClient.from('notificaciones').insert([{
+            usuario_id: receptorId,
+            emisor_id: sesion.id,
+            emisor_nombre: sesion.nombre,
+            tipo: "te envió una solicitud",
+            leida: false
+        }]);
+        alert("Solicitud enviada");
+    };
+
+    function configurarNavbar() {
+        const miInst = obtenerInstitucion(sesion.email);
+        const avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(sesion.nombre)}&background=0D6EFD&color=fff`;
+        document.getElementById("facultadNav").innerHTML = `🎓 ${miInst}`;
+        document.getElementById("facultadNav").classList.remove("auth-vacia");
+        
+        document.getElementById("authArea").innerHTML = `
+            <div class="dropdown">
+                <button class="btn btn-light btn-sm dropdown-toggle fw-bold" data-bs-toggle="dropdown">${sesion.nombre.split(' ')[0]}</button>
+                <ul class="dropdown-menu dropdown-menu-end shadow p-3">
+                    <li class="text-center">
+                        <img src="${avatar}" class="rounded-circle mb-2" width="50">
+                        <div class="fw-bold text-primary small">${sesion.nombre}</div>
+                        <div class="text-muted small" style="font-size:0.7rem">${miInst}</div>
+                    </li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item fw-bold" href="perfil.html">Ver Perfil</a></li>
+                    <li><button class="dropdown-item text-danger fw-bold" onclick="localStorage.removeItem('sesion'); location.href='index.html'">Cerrar sesión</button></li>
+                </ul>
+            </div>`;
+        document.getElementById("authArea").classList.remove("auth-vacia");
+    }
+
+    configurarNavbar();
+    cargarTodo();
+  })();
+
+  // --- FUNCIONES DE ACCIÓN DE AMISTAD ---
+
+// ACEPTAR SOLICITUD
+window.aceptarAmigo = async (notifId, emisorId, emisorNombre) => {
+    try {
+        // 1. Crear la relación de amistad (Ida y Vuelta)
+        // Esto asegura que ambos aparezcan en la lista de amigos del otro
+        const { error: amistadError } = await window.supabaseClient
+            .from('amistades')
+            .insert([
+                { user_id: sesion.id, amigo_id: emisorId, estado: 'aceptado' },
+                { user_id: emisorId, amigo_id: sesion.id, estado: 'aceptado' }
+            ]);
+
+        if (amistadError) throw amistadError;
+
+        // 2. Actualizar la notificación para que ya no aparezca como pendiente
+        // Opcional: Puedes borrarla o marcarla como leída/procesada
+        await window.supabaseClient
+            .from('notificaciones')
+            .update({ leida: true, tipo: 'ahora son amigos' })
+            .eq('id', notifId);
+
+        // 3. Notificar al emisor que su solicitud fue aceptada
+        await window.supabaseClient.from('notificaciones').insert([{
+            usuario_id: emisorId,
+            emisor_id: sesion.id,
+            emisor_nombre: sesion.nombre,
+            tipo: "aceptó tu solicitud de amistad",
+            leida: false
+        }]);
+
+        alert(`¡Ahora eres amigo de ${emisorNombre}!`);
+        location.reload(); // Refrescar para ver los cambios
+
+    } catch (err) {
+        console.error("Error al aceptar:", err);
+        alert("No se pudo procesar la solicitud.");
+    }
+};
+
+// RECHAZAR SOLICITUD
+window.rechazarSolicitud = async (notifId) => {
+    if (!confirm("¿Seguro que quieres eliminar esta solicitud?")) return;
+    
+    try {
+        // Simplemente marcamos la notificación como leída para que desaparezca
+        // o la eliminamos de la tabla
+        await window.supabaseClient
+            .from('notificaciones')
+            .delete()
+            .eq('id', notifId);
+
+        location.reload();
+    } catch (err) {
+        console.error("Error al rechazar:", err);
+    }
+};
+</script>
+</body>
+</html>

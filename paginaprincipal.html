@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="es" data-bs-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Red UNAM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+  <style>
+    /* ── TOKENS ── */
+    :root {
+      --bg:        #0a0c10;
+      --surface:   #111318;
+      --surface2:  #181c24;
+      --border:    rgba(255,255,255,0.07);
+      --accent:    #002f6c;   /* Azul UNAM */
+      --gold:      #c8a951;   /* Oro UNAM */
+      --gold-glow: rgba(200,169,81,0.18);
+      --text:      #e8eaf0;
+      --muted:     #6b7280;
+      --danger:    #e05252;
+      --radius:    14px;
+      --card-shadow: 0 2px 24px rgba(0,0,0,0.45);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Sora', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      background-image:
+        radial-gradient(ellipse 80% 60% at 50% -10%, rgba(0,47,108,0.35) 0%, transparent 70%);
+    }
+
+    /* ── HEADER ── */
+    .header-main {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(10,12,16,0.85);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 28px;
+      gap: 16px;
+    }
+
+    /* Logo */
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+    .logo-mark {
+      width: 34px; height: 34px;
+      background: linear-gradient(135deg, var(--accent), #0047ab);
+      border-radius: 8px;
+      display: grid; place-items: center;
+      font-family: 'DM Serif Display', serif;
+      font-size: 16px; color: var(--gold);
+      box-shadow: 0 0 18px rgba(0,47,108,0.6);
+    }
+    .logo-text {
+      font-size: 15px; font-weight: 700; letter-spacing: 0.04em;
+      background: linear-gradient(90deg, #fff 60%, var(--gold));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+
+    /* Buscador */
+    .search-container {
+      display: flex; align-items: center;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 6px 14px;
+      gap: 8px;
+      flex: 1; max-width: 320px;
+      transition: border-color .2s;
+    }
+    .search-container:focus-within { border-color: var(--gold); }
+    .search-input {
+      background: none; border: none; outline: none;
+      color: var(--text); font-family: inherit;
+      font-size: 13px; width: 100%;
+    }
+    .search-input::placeholder { color: var(--muted); }
+    .search-btn {
+      background: none; border: none; cursor: pointer;
+      color: var(--muted); font-size: 14px;
+      transition: color .2s;
+    }
+    .search-btn:hover { color: var(--gold); }
+
+    /* Perfil */
+    .perfil-info {
+      display: flex; align-items: center; gap: 10px; cursor: pointer;
+    }
+    .username { font-size: 13px; font-weight: 600; color: var(--text); }
+    .profile-pic {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--gold) 100%);
+      border: 2px solid var(--gold);
+      flex-shrink: 0;
+    }
+    .profile-pic.official-pic {
+      background: linear-gradient(135deg, #002f6c, #0047ab);
+    }
+
+    /* Navbar */
+    .navbar {
+      border-top: 1px solid var(--border);
+      padding: 0 28px;
+    }
+    .nav-links {
+      list-style: none;
+      display: flex; gap: 4px;
+    }
+    .nav-links li a {
+      display: block;
+      padding: 10px 16px;
+      text-decoration: none;
+      font-size: 13px; font-weight: 600;
+      color: var(--muted);
+      border-bottom: 2px solid transparent;
+      transition: color .2s, border-color .2s;
+      letter-spacing: 0.02em;
+    }
+    .nav-links li a:hover,
+    .nav-links li a.active {
+      color: var(--gold);
+      border-bottom-color: var(--gold);
+    }
+
+    /* ── LAYOUT ── */
+    .feed-container {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 28px 16px 80px;
+      display: flex; flex-direction: column; gap: 0;
+    }
+
+    /* ── CARD BASE ── */
+    .login-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 16px;
+      box-shadow: var(--card-shadow);
+      transition: border-color .2s;
+      animation: fadeUp .4s ease both;
+    }
+    .login-card:hover { border-color: rgba(200,169,81,0.2); }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── CREAR POST ── */
+    .create-card-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 17px;
+      color: var(--text);
+      margin-bottom: 14px;
+    }
+    .create-card-title span { color: var(--gold); }
+
+    .post-textarea {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 14px;
+      color: var(--text);
+      font-family: 'Sora', sans-serif;
+      font-size: 14px;
+      resize: none;
+      outline: none;
+      transition: border-color .2s;
+      line-height: 1.55;
+    }
+    .post-textarea:focus { border-color: var(--gold); }
+    .post-textarea::placeholder { color: var(--muted); }
+
+    .image-preview-container { margin-top: 12px; }
+    .preview-wrapper { position: relative; display: inline-block; }
+    .preview-wrapper img {
+      max-width: 100%; border-radius: 10px;
+      border: 1px solid var(--border);
+    }
+    .remove-img {
+      display: inline-flex; align-items: center; gap: 4px;
+      margin-top: 6px;
+      font-size: 12px; color: var(--danger);
+      cursor: pointer; font-weight: 600;
+      transition: opacity .2s;
+    }
+    .remove-img:hover { opacity: .75; }
+
+    .post-actions {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-top: 14px; gap: 10px;
+    }
+    .btn-attach {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-size: 12px; font-weight: 600;
+      color: var(--muted); cursor: pointer;
+      transition: color .2s, border-color .2s;
+    }
+    .btn-attach:hover { color: var(--gold); border-color: var(--gold); }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent) 0%, #0047ab 100%);
+      color: #fff;
+      border: none; border-radius: 8px;
+      padding: 8px 22px;
+      font-family: 'Sora', sans-serif;
+      font-size: 13px; font-weight: 700;
+      cursor: pointer; letter-spacing: 0.03em;
+      box-shadow: 0 0 18px rgba(0,47,108,0.4);
+      transition: opacity .2s, transform .15s;
+    }
+    .btn-primary:hover { opacity: .88; transform: translateY(-1px); }
+    .btn-primary:active { transform: translateY(0); }
+
+    /* ── POST CARD ── */
+    .post-header {
+      display: flex; align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .header-info { display: flex; align-items: center; gap: 10px; }
+    .header-info strong { font-size: 14px; font-weight: 700; }
+    .post-date {
+      font-size: 12px; color: var(--muted); margin-left: 4px;
+    }
+    .post-body {
+      font-size: 14px; line-height: 1.65;
+      color: #c9cdd8;
+    }
+    .post-image-content { margin-top: 12px; }
+    .post-image-content img {
+      max-width: 100%; border-radius: 10px;
+      border: 1px solid var(--border);
+      display: block;
+    }
+
+    /* Badge verificado */
+    .official-post .header-info strong::after {
+      content: '✓';
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 16px; height: 16px;
+      background: var(--gold);
+      color: #000; border-radius: 50%;
+      font-size: 9px; font-weight: 900;
+      margin-left: 5px;
+    }
+
+    /* Eliminar btn */
+    .delete-post-btn {
+      background: none; border: none;
+      color: var(--danger); font-size: 12px;
+      cursor: pointer; font-family: 'Sora', sans-serif;
+      font-weight: 600; padding: 4px 8px;
+      border-radius: 6px;
+      transition: background .2s;
+    }
+    .delete-post-btn:hover { background: rgba(224,82,82,0.12); }
+
+    /* ── DIVIDER ── */
+    .feed-divider {
+      display: flex; align-items: center; gap: 12px;
+      margin: 4px 0 20px;
+      color: var(--muted); font-size: 11px;
+      font-weight: 600; letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .feed-divider::before,
+    .feed-divider::after {
+      content: ''; flex: 1;
+      height: 1px; background: var(--border);
+    }
+
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--surface2); border-radius: 99px; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 540px) {
+      .top-bar { padding: 10px 14px; }
+      .navbar { padding: 0 14px; }
+      .feed-container { padding: 18px 10px 60px; }
+      .search-container { max-width: 180px; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="header-main">
+  <div class="top-bar">
+    <!-- Logo -->
+    <a class="logo" href="#">
+      <div class="logo-mark">U</div>
+      <span class="logo-text">Red UNAM</span>
+    </a>
+
+    <!-- Buscador -->
+    <div class="search-container">
+      <input type="text" class="search-input" placeholder="Buscar en la red...">
+      <button class="search-btn">🔍</button>
+    </div>
+
+    <!-- Perfil -->
+    <div id="authArea">
+      <div class="perfil-info">
+        <span class="username">Mi Perfil</span>
+        <div class="profile-pic"></div>
+      </div>
+    </div>
+  </div>
+
+  <nav class="navbar">
+    <ul class="nav-links">
+      <li><a href="#" class="active">Inicio</a></li>
+      <li><a href="#">Explorar</a></li>
+      <li><a href="#">Mensajes</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main class="feed-container">
+
+  <!-- CREAR POST -->
+  <article class="login-card">
+    <h3 class="create-card-title">¿Qué quieres <span>compartir</span>?</h3>
+    <textarea class="post-textarea" id="post-text" placeholder="Escribe algo para la comunidad..." rows="3"></textarea>
+    <div id="image-preview" class="image-preview-container"></div>
+    <div class="post-actions">
+      <input type="file" id="upload-image" accept="image/*" hidden>
+      <label for="upload-image" class="btn-attach">📷 Adjuntar Foto</label>
+      <button class="btn-primary" onclick="publicarPost()">Publicar</button>
+    </div>
+  </article>
+
+  <!-- DIVIDER -->
+  <div class="feed-divider">Publicaciones recientes</div>
+
+  <!-- TIMELINE -->
+  <div id="posts-timeline">
+    <!-- POST OFICIAL -->
+    <article class="login-card official-post">
+      <div class="post-header">
+        <div class="header-info">
+          <div class="profile-pic official-pic"></div>
+          <div>
+            <strong>FES Aragón UNAM</strong>
+            <span class="post-date">• Comunicado 05/05/26</span>
+          </div>
+        </div>
+      </div>
+      <p class="post-body">#OrgulloUNAM — Bienvenidos a la red oficial de nuestra comunidad universitaria.</p>
+      <div class="post-image-content">
+        <img src="https://scontent.fmex46-1.fna.fbcdn.net/v/t39.30808-6/690755363_1383621163796105_5224523420763221482_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=13d280&_nc_eui2=AeE0WOsx4dCsLMX4x-USNc_oBXUlKoc_-rkFdSUqhz_6udxMYicReVEaS2Tk8_JQLhKBToMuIIziTzaeDdfp1Uj_&_nc_ohc=jyZtb_n-zIsQ7kNvwGbkEN3&_nc_oc=AdrGx-NRcMPmr69b4Q6rHTJ1DjBNwx3RbtrSjjzpfI-DyYVBVcy_v2tjdSdGsdV7Z6U&_nc_zt=23&_nc_ht=scontent.fmex46-1.fna&_nc_gid=NPceYWVIth-1vcA-K4WrdA&_nc_ss=7b2a8&oh=00_Af5z3cymo1jX-iHPtU8qM1NhLw1cfzkCCBeHodIGlzptSQ&oe=6A005305" alt="FES Aragón">
+      </div>
+    </article>
+  </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/conexion.js"></script>
+<script>
+  // ── NOMBRE DEL BUCKET en Supabase Storage ──────────────────────────────────
+  // Crea un bucket llamado "publicaciones-media" en tu panel de Supabase
+  // Storage → New bucket → nombre: publicaciones-media → Public bucket: ✅
+  const BUCKET = 'publicaciones-media';
+
+  const fileInput        = document.getElementById('upload-image');
+  const previewContainer = document.getElementById('image-preview');
+  const postText         = document.getElementById('post-text');
+  const timeline         = document.getElementById('posts-timeline');
+  let   currentFile      = null;   // File object real (no base64)
+
+  // Validar sesión
+  const sesionData = localStorage.getItem("sesion");
+  if (!sesionData) window.location.replace("index.html");
+  const sesion = JSON.parse(sesionData);
+
+  // Mostrar nombre en el perfil del header
+  document.querySelector('.username').textContent = sesion.nombre || 'Mi Perfil';
+
+  // ── PREVISUALIZAR IMAGEN ────────────────────────────────────────────────────
+  fileInput.addEventListener('change', function () {
+    const file = this.files[0];
+    if (!file) return;
+    currentFile = file;
+    const url = URL.createObjectURL(file);
+    previewContainer.innerHTML = `
+      <div class="preview-wrapper">
+        <img src="${url}">
+        <div class="remove-img" onclick="removeImage()">✕ Quitar imagen</div>
+      </div>`;
+  });
+
+  function removeImage() {
+    fileInput.value = "";
+    previewContainer.innerHTML = "";
+    currentFile = null;
+  }
+
+  // ── SUBIR ARCHIVO A SUPABASE STORAGE ───────────────────────────────────────
+  // ⚠️ REQUISITO: En Supabase → Storage → publicaciones-media → Policies
+  // Agrega esta política para permitir uploads sin autenticación nativa:
+  //   Policy name: "Allow all uploads"
+  //   Allowed operations: INSERT
+  //   Target roles: anon, authenticated
+  //   Policy definition: true
+  async function subirArchivoStorage(file) {
+    const ext      = file.name.split('.').pop().toLowerCase();
+    const fileName = `${sesion.id}/${Date.now()}.${ext}`;
+
+    const { data, error } = await window.supabaseClient
+      .storage
+      .from(BUCKET)
+      .upload(fileName, file, {
+        cacheControl: '3600',
+        upsert: false,
+        contentType: file.type
+      });
+
+    if (error) {
+      // Error RLS: guía al usuario
+      if (error.message.includes('row-level security') || error.message.includes('policy')) {
+        throw new Error(
+          'Permiso denegado en Storage.\n\n' +
+          'Ve a Supabase → Storage → publicaciones-media → Policies\n' +
+          'y agrega una política INSERT para "anon" con definición: true'
+        );
+      }
+      throw new Error('Storage: ' + error.message);
+    }
+
+    const { data: urlData } = window.supabaseClient
+      .storage
+      .from(BUCKET)
+      .getPublicUrl(data.path);
+
+    return urlData.publicUrl;
+  }
+
+  // ── PUBLICAR POST ───────────────────────────────────────────────────────────
+  async function publicarPost() {
+    const text = postText.value.trim();
+    if (text === "" && !currentFile) return;
+
+    // Deshabilitar botón mientras se sube
+    const btn = document.querySelector('.btn-primary');
+    btn.textContent = 'Publicando...';
+    btn.disabled = true;
+
+    try {
+      let archivo_url  = null;
+      let tipo_archivo = null;
+
+      // 1) Subir imagen a Storage si hay una
+      if (currentFile) {
+        archivo_url  = await subirArchivoStorage(currentFile);
+        tipo_archivo = currentFile.type;   // ej: "image/jpeg"
+      }
+
+      // 2) Insertar registro en la tabla "publicaciones"
+      //    Campos correctos según tu esquema de Supabase:
+      //    id, autor_id, autor_nombre, contenido_texto,
+      //    archivo_url, tipo_archivo, likes_count, creado_a_las
+      const nuevoPost = {
+        autor_id:        sesion.id,
+        autor_nombre:    sesion.nombre,
+        contenido_texto: text,
+        archivo_url,          // ← nombre correcto (antes estaba multimedia_url)
+        tipo_archivo          // ← columna extra de tu tabla
+      };
+
+      const { data, error } = await window.supabaseClient
+        .from('publicaciones')
+        .insert([nuevoPost])
+        .select();
+
+      if (error) throw error;
+
+      renderizarPostEnHTML(data[0], true);
+      postText.value = "";
+      removeImage();
+
+    } catch (err) {
+      alert("Error al publicar: " + err.message);
+    } finally {
+      btn.textContent = 'Publicar';
+      btn.disabled = false;
+    }
+  }
+
+  // ── CARGAR PUBLICACIONES ────────────────────────────────────────────────────
+  async function cargarPublicaciones() {
+    timeline.innerHTML = '<p style="text-align:center;padding:32px;color:var(--muted);font-size:13px;">Cargando...</p>';
+    try {
+      const { data, error } = await window.supabaseClient
+        .from('publicaciones')
+        .select('*')
+        .order('creado_a_las', { ascending: false });
+      if (error) throw error;
+      timeline.innerHTML = '';
+      if (data.length === 0) {
+        timeline.innerHTML = '<p style="text-align:center;padding:32px;color:var(--muted);font-size:13px;">Sé el primero en publicar algo ✨</p>';
+        return;
+      }
+      data.forEach(post => renderizarPostEnHTML(post));
+    } catch (err) {
+      timeline.innerHTML = '';
+      console.error("Error al cargar posts:", err.message);
+    }
+  }
+
+  // ── RENDERIZAR POST ─────────────────────────────────────────────────────────
+  function renderizarPostEnHTML(post, alPrincipio = false) {
+    const fecha = new Date(post.creado_a_las).toLocaleString('es-MX', {
+      day: '2-digit', month: 'short', year: 'numeric',
+      hour: '2-digit', minute: '2-digit'
+    });
+    const article = document.createElement('article');
+    article.className = 'login-card';
+    article.id = `post-${post.id}`;
+
+    const btnEliminar = post.autor_id === sesion.id
+      ? `<button class="delete-post-btn" onclick="eliminarEstePost(${post.id}, '${post.archivo_url || ''}')">Eliminar</button>`
+      : '';
+
+    // Mostrar imagen si existe (viene de Storage como URL pública)
+    const mediaHtml = post.archivo_url
+      ? `<div class="post-image-content"><img src="${post.archivo_url}" loading="lazy"></div>`
+      : '';
+
+    article.innerHTML = `
+      <div class="post-header">
+        <div class="header-info">
+          <div class="profile-pic"></div>
+          <div>
+            <strong>${post.autor_nombre}</strong>
+            <span class="post-date">• ${fecha}</span>
+          </div>
+        </div>
+        ${btnEliminar}
+      </div>
+      <p class="post-body">${post.contenido_texto || ''}</p>
+      ${mediaHtml}`;
+
+    alPrincipio ? timeline.prepend(article) : timeline.appendChild(article);
+  }
+
+  // ── ELIMINAR POST (tabla + Storage) ────────────────────────────────────────
+  async function eliminarEstePost(postId, archivoUrl) {
+    if (!confirm("¿Deseas eliminar este post?")) return;
+    try {
+      // 1) Borrar de la tabla
+      const { error } = await window.supabaseClient
+        .from('publicaciones')
+        .delete()
+        .eq('id', postId)
+        .eq('autor_id', sesion.id);
+      if (error) throw error;
+
+      // 2) Borrar archivo de Storage si existía
+      if (archivoUrl) {
+        // Extraer la ruta relativa dentro del bucket desde la URL pública
+        const path = archivoUrl.split(`/${BUCKET}/`)[1];
+        if (path) {
+          await window.supabaseClient.storage.from(BUCKET).remove([path]);
+        }
+      }
+
+      document.getElementById(`post-${postId}`).remove();
+    } catch (err) {
+      alert("Error al eliminar: " + err.message);
+    }
+  }
+
+  // Guard para evitar doble carga
+  let yaInicio = false;
+  document.addEventListener("DOMContentLoaded", () => {
+    if (yaInicio) return;
+    yaInicio = true;
+    cargarPublicaciones();
+  });
+</script>
+</body>
+</html>

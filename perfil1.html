@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mi Perfil — Red UNAM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+  <style>
+    /* ── TOKENS (paginaprincipal) ── */
+    :root {
+      --bg:          #0a0c10;
+      --surface:     #111318;
+      --surface2:    #181c24;
+      --border:      rgba(255,255,255,0.07);
+      --accent:      #002f6c;
+      --gold:        #c8a951;
+      --gold-glow:   rgba(200,169,81,0.18);
+      --text:        #e8eaf0;
+      --muted:       #6b7280;
+      --danger:      #e05252;
+      --success:     #34d399;
+      --radius:      14px;
+      --card-shadow: 0 2px 24px rgba(0,0,0,0.45);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Sora', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      background-image: radial-gradient(ellipse 80% 60% at 50% -10%, rgba(0,47,108,0.35) 0%, transparent 70%);
+    }
+
+    /* ── HEADER (igual que paginaprincipal) ── */
+    .header-main {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(10,12,16,0.85);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+    }
+    .top-bar {
+      display: flex; align-items: center;
+      justify-content: space-between;
+      padding: 12px 28px; gap: 16px;
+    }
+    .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .logo-mark {
+      width: 34px; height: 34px;
+      background: linear-gradient(135deg, var(--accent), #0047ab);
+      border-radius: 8px; display: grid; place-items: center;
+      font-family: 'DM Serif Display', serif;
+      font-size: 16px; color: var(--gold);
+      box-shadow: 0 0 18px rgba(0,47,108,0.6);
+    }
+    .logo-text {
+      font-size: 15px; font-weight: 700; letter-spacing: 0.04em;
+      background: linear-gradient(90deg, #fff 60%, var(--gold));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .search-container {
+      display: flex; align-items: center;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 999px; padding: 6px 14px; gap: 8px;
+      flex: 1; max-width: 320px; transition: border-color .2s;
+    }
+    .search-container:focus-within { border-color: var(--gold); }
+    .search-input {
+      background: none; border: none; outline: none;
+      color: var(--text); font-family: inherit; font-size: 13px; width: 100%;
+    }
+    .search-input::placeholder { color: var(--muted); }
+    .search-btn {
+      background: none; border: none; cursor: pointer;
+      color: var(--muted); font-size: 14px; transition: color .2s;
+    }
+    .search-btn:hover { color: var(--gold); }
+    .perfil-info { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+    .username { font-size: 13px; font-weight: 600; }
+    .nav-pill {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--gold) 100%);
+      border: 2px solid var(--gold); flex-shrink: 0;
+      overflow: hidden; display: grid; place-items: center;
+    }
+    .nav-pill img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+    .navbar {
+      border-top: 1px solid var(--border); padding: 0 28px;
+    }
+    .nav-links { list-style: none; display: flex; gap: 4px; }
+    .nav-links li a {
+      display: block; padding: 10px 16px; text-decoration: none;
+      font-size: 13px; font-weight: 600; color: var(--muted);
+      border-bottom: 2px solid transparent;
+      transition: color .2s, border-color .2s; letter-spacing: 0.02em;
+    }
+    .nav-links li a:hover,
+    .nav-links li a.active { color: var(--gold); border-bottom-color: var(--gold); }
+
+    /* ── LAYOUT ── */
+    .page-wrap {
+      max-width: 680px; margin: 0 auto;
+      padding: 32px 16px 80px;
+    }
+
+    /* ── BANNER / HERO ── */
+    .profile-hero {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin-bottom: 20px;
+      box-shadow: var(--card-shadow);
+      animation: fadeUp .4s ease both;
+    }
+    .hero-banner {
+      height: 110px;
+      background: linear-gradient(135deg, var(--accent) 0%, #0a1a3a 50%, #1a0a00 100%);
+      position: relative;
+    }
+    .hero-banner::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: repeating-linear-gradient(
+        45deg,
+        rgba(200,169,81,0.04) 0px, rgba(200,169,81,0.04) 1px,
+        transparent 1px, transparent 20px
+      );
+    }
+    .hero-body { padding: 0 24px 24px; }
+
+    /* Avatar grande */
+    .avatar-wrap {
+      position: relative; display: inline-block;
+      margin-top: -44px; margin-bottom: 12px;
+    }
+    .avatar-lg {
+      width: 88px; height: 88px; border-radius: 50%;
+      border: 3px solid var(--gold);
+      object-fit: cover;
+      background: linear-gradient(135deg, var(--accent), var(--gold));
+      display: block;
+    }
+    .avatar-upload-btn {
+      position: absolute; bottom: 2px; right: 2px;
+      width: 26px; height: 26px; border-radius: 50%;
+      background: var(--surface2); border: 1px solid var(--gold);
+      cursor: pointer; font-size: 13px;
+      display: grid; place-items: center;
+      transition: background .2s;
+    }
+    .avatar-upload-btn:hover { background: var(--gold-glow); }
+
+    /* Nombre + bio */
+    .profile-name {
+      font-family: 'DM Serif Display', serif;
+      font-size: 22px; font-weight: 400;
+      margin-bottom: 4px;
+    }
+    .profile-meta {
+      font-size: 12px; color: var(--muted); margin-bottom: 10px;
+    }
+    .profile-bio {
+      font-size: 13px; color: #b0b5c0;
+      line-height: 1.6; max-width: 460px;
+    }
+    .profile-bio.empty { color: var(--muted); font-style: italic; }
+
+    /* Stats row */
+    .stats-row {
+      display: flex; gap: 28px; margin-top: 16px;
+      padding-top: 16px; border-top: 1px solid var(--border);
+    }
+    .stat { text-align: center; }
+    .stat-num {
+      font-size: 18px; font-weight: 700;
+      color: var(--gold);
+      font-family: 'DM Serif Display', serif;
+    }
+    .stat-label { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+    /* Botones perfil */
+    .profile-actions {
+      display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap;
+    }
+    .btn-edit {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 8px; padding: 8px 18px;
+      font-size: 12px; font-weight: 600; color: var(--text);
+      cursor: pointer; font-family: 'Sora', sans-serif;
+      transition: border-color .2s, color .2s;
+    }
+    .btn-edit:hover { border-color: var(--gold); color: var(--gold); }
+    .btn-logout {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: none; border: 1px solid rgba(224,82,82,0.3);
+      border-radius: 8px; padding: 8px 18px;
+      font-size: 12px; font-weight: 600; color: var(--danger);
+      cursor: pointer; font-family: 'Sora', sans-serif;
+      transition: background .2s;
+    }
+    .btn-logout:hover { background: rgba(224,82,82,0.1); }
+
+    /* ── EDIT PANEL (inline, oculto por default) ── */
+    .edit-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-bottom: 20px;
+      box-shadow: var(--card-shadow);
+      display: none;
+      animation: fadeUp .3s ease both;
+    }
+    .edit-panel.open { display: block; }
+    .edit-panel h4 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 17px; margin-bottom: 18px;
+      color: var(--text);
+    }
+    .edit-panel h4 span { color: var(--gold); }
+    .field-group { margin-bottom: 14px; }
+    .field-label {
+      display: block; font-size: 11px; font-weight: 600;
+      color: var(--muted); letter-spacing: 0.07em;
+      text-transform: uppercase; margin-bottom: 6px;
+    }
+    .field-input, .field-textarea {
+      width: 100%; background: var(--surface2);
+      border: 1px solid var(--border); border-radius: 10px;
+      padding: 10px 14px; color: var(--text);
+      font-family: 'Sora', sans-serif; font-size: 13px;
+      outline: none; transition: border-color .2s;
+    }
+    .field-input:focus, .field-textarea:focus { border-color: var(--gold); }
+    .field-textarea { resize: vertical; min-height: 72px; line-height: 1.5; }
+    .field-input::placeholder, .field-textarea::placeholder { color: var(--muted); }
+    .password-section {
+      border-top: 1px solid var(--border);
+      padding-top: 14px; margin-top: 14px;
+    }
+    .section-title {
+      font-size: 11px; font-weight: 700;
+      color: var(--muted); letter-spacing: 0.08em;
+      text-transform: uppercase; margin-bottom: 12px;
+    }
+    .edit-actions {
+      display: flex; gap: 10px; margin-top: 18px; justify-content: flex-end;
+    }
+    .btn-cancel {
+      background: none; border: 1px solid var(--border);
+      border-radius: 8px; padding: 8px 20px;
+      font-size: 13px; font-weight: 600; color: var(--muted);
+      cursor: pointer; font-family: 'Sora', sans-serif;
+      transition: border-color .2s;
+    }
+    .btn-cancel:hover { border-color: var(--muted); }
+    .btn-save {
+      background: linear-gradient(135deg, var(--accent) 0%, #0047ab 100%);
+      color: #fff; border: none; border-radius: 8px;
+      padding: 8px 24px; font-family: 'Sora', sans-serif;
+      font-size: 13px; font-weight: 700; cursor: pointer;
+      box-shadow: 0 0 18px rgba(0,47,108,0.4);
+      transition: opacity .2s, transform .15s;
+    }
+    .btn-save:hover { opacity: .88; transform: translateY(-1px); }
+
+    /* ── POSTS SECTION ── */
+    .section-divider {
+      display: flex; align-items: center; gap: 12px;
+      margin: 4px 0 20px; color: var(--muted);
+      font-size: 11px; font-weight: 600;
+      letter-spacing: 0.08em; text-transform: uppercase;
+    }
+    .section-divider::before, .section-divider::after {
+      content: ''; flex: 1; height: 1px; background: var(--border);
+    }
+
+    /* Card de post */
+    .post-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 18px; margin-bottom: 14px;
+      box-shadow: var(--card-shadow); transition: border-color .2s;
+      animation: fadeUp .4s ease both;
+    }
+    .post-card:hover { border-color: rgba(200,169,81,0.2); }
+    .post-head {
+      display: flex; align-items: center;
+      justify-content: space-between; margin-bottom: 10px;
+    }
+    .post-author { display: flex; align-items: center; gap: 10px; }
+    .post-author-pic {
+      width: 34px; height: 34px; border-radius: 50%;
+      overflow: hidden; border: 2px solid var(--gold);
+      flex-shrink: 0;
+    }
+    .post-author-pic img { width: 100%; height: 100%; object-fit: cover; }
+    .post-author strong { font-size: 13px; font-weight: 700; }
+    .post-date { font-size: 11px; color: var(--muted); margin-top: 1px; }
+    .post-text { font-size: 14px; line-height: 1.65; color: #c9cdd8; }
+    .post-img { margin-top: 12px; }
+    .post-img img {
+      max-width: 100%; border-radius: 10px;
+      border: 1px solid var(--border); display: block;
+    }
+    .btn-delete {
+      background: none; border: none; cursor: pointer;
+      color: var(--danger); font-size: 12px; font-weight: 600;
+      font-family: 'Sora', sans-serif;
+      padding: 4px 8px; border-radius: 6px;
+      transition: background .2s;
+    }
+    .btn-delete:hover { background: rgba(224,82,82,0.12); }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center; padding: 48px 24px;
+      color: var(--muted);
+    }
+    .empty-state .empty-icon { font-size: 36px; margin-bottom: 12px; }
+    .empty-state p { font-size: 13px; }
+
+    /* ── TOAST ── */
+    #toast-container {
+      position: fixed; bottom: 24px; right: 24px;
+      z-index: 9999; display: flex; flex-direction: column;
+      gap: 10px; pointer-events: none;
+    }
+    .toast {
+      display: flex; align-items: flex-start; gap: 12px;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 12px; padding: 14px 16px;
+      min-width: 260px; max-width: 340px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+      pointer-events: all;
+      animation: toastIn .3s cubic-bezier(.34,1.56,.64,1) both;
+    }
+    .toast.hide { animation: toastOut .25s ease forwards; }
+    .toast-icon { font-size: 17px; flex-shrink: 0; margin-top: 1px; }
+    .toast-body { flex: 1; }
+    .toast-title { font-size: 13px; font-weight: 700; margin-bottom: 2px; }
+    .toast-msg   { font-size: 12px; color: var(--muted); line-height: 1.4; }
+    .toast.error { border-color: rgba(224,82,82,0.4); }
+    .toast.error .toast-title { color: var(--danger); }
+    .toast.ok    { border-color: rgba(52,211,153,0.4); }
+    .toast.ok .toast-title    { color: var(--success); }
+
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--surface2); border-radius: 99px; }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes toastIn  { from { opacity:0; transform:translateY(16px) scale(.95); } to { opacity:1; transform:none; } }
+    @keyframes toastOut { to   { opacity:0; transform:translateY(8px); } }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 540px) {
+      .top-bar  { padding: 10px 14px; }
+      .navbar   { padding: 0 14px; }
+      .page-wrap { padding: 18px 10px 60px; }
+      .search-container { max-width: 160px; }
+      .stats-row { gap: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="toast-container"></div>
+
+<!-- ── HEADER ── -->
+<header class="header-main">
+  <div class="top-bar">
+    <a class="logo" href="paginaprincipal.html">
+      <div class="logo-mark">U</div>
+      <span class="logo-text">Red UNAM</span>
+    </a>
+    <div class="search-container">
+      <input type="text" class="search-input" placeholder="Buscar en la red...">
+      <button class="search-btn">🔍</button>
+    </div>
+    <div class="perfil-info">
+      <span class="username" id="nav-nombre">Mi Perfil</span>
+      <div class="nav-pill">
+        <img id="nav-avatar" src="" alt="avatar">
+      </div>
+    </div>
+  </div>
+  <nav class="navbar">
+    <ul class="nav-links">
+      <li><a href="paginaprincipal.html">Inicio</a></li>
+      <li><a href="#">Explorar</a></li>
+      <li><a href="#">Mensajes</a></li>
+      <li><a href="perfil.html" class="active">Mi Perfil</a></li>
+    </ul>
+  </nav>
+</header>
+
+<!-- ── CONTENIDO ── -->
+<div class="page-wrap">
+
+  <!-- HERO DE PERFIL -->
+  <div class="profile-hero">
+    <div class="hero-banner"></div>
+    <div class="hero-body">
+
+      <!-- Avatar -->
+      <div class="avatar-wrap">
+        <img class="avatar-lg" id="avatar-grande" src="" alt="foto de perfil">
+        <label class="avatar-upload-btn" for="avatar-file-input" title="Cambiar foto">📷</label>
+        <input type="file" id="avatar-file-input" accept="image/*" hidden>
+      </div>
+
+      <!-- Info -->
+      <div class="profile-name" id="display-nombre">—</div>
+      <div class="profile-meta" id="display-email">—</div>
+      <div class="profile-bio" id="display-bio">Sin biografía</div>
+
+      <!-- Stats -->
+      <div class="stats-row">
+        <div class="stat">
+          <div class="stat-num" id="stat-posts">0</div>
+          <div class="stat-label">Publicaciones</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num" id="stat-likes">0</div>
+          <div class="stat-label">Likes recibidos</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num" id="stat-miembro">—</div>
+          <div class="stat-label">Miembro desde</div>
+        </div>
+      </div>
+
+      <!-- Acciones -->
+      <div class="profile-actions">
+        <button class="btn-edit" id="btn-toggle-edit">✏️ Editar perfil</button>
+        <button class="btn-logout" id="btn-logout">↪ Cerrar sesión</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PANEL DE EDICIÓN (inline, toggleable) -->
+  <div class="edit-panel" id="edit-panel">
+    <h4>Editar <span>perfil</span></h4>
+
+    <div class="field-group">
+      <label class="field-label" for="edit-nombre">Nombre</label>
+      <input class="field-input" id="edit-nombre" type="text" placeholder="Tu nombre completo">
+    </div>
+
+    <div class="field-group">
+      <label class="field-label" for="edit-correo">Correo</label>
+      <input class="field-input" id="edit-correo" type="email" placeholder="tu@correo.com">
+    </div>
+
+    <div class="field-group">
+      <label class="field-label" for="edit-bio">Biografía</label>
+      <textarea class="field-textarea" id="edit-bio" placeholder="Cuéntale algo a la comunidad..."></textarea>
+    </div>
+
+    <div class="password-section">
+      <div class="section-title">Cambiar contraseña (opcional)</div>
+      <div class="field-group">
+        <label class="field-label" for="edit-pass">Nueva contraseña</label>
+        <input class="field-input" id="edit-pass" type="password" placeholder="Mínimo 6 caracteres">
+      </div>
+      <div class="field-group">
+        <label class="field-label" for="edit-pass2">Confirmar contraseña</label>
+        <input class="field-input" id="edit-pass2" type="password" placeholder="Repite la contraseña">
+      </div>
+    </div>
+
+    <div class="edit-actions">
+      <button class="btn-cancel" id="btn-cancel-edit">Cancelar</button>
+      <button class="btn-save" id="btn-save-edit">Guardar cambios</button>
+    </div>
+  </div>
+
+  <!-- MIS PUBLICACIONES -->
+  <div class="section-divider">Mis publicaciones</div>
+  <div id="mis-posts">
+    <div class="empty-state">
+      <div class="empty-icon">⏳</div>
+      <p>Cargando publicaciones...</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── SCRIPTS ── -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/conexion.js"></script>
+<script>
+(function () {
+
+  // ── SESIÓN ────────────────────────────────────────────────────────────────
+  const sesionData = localStorage.getItem('sesion');
+  if (!sesionData) { window.location.replace('index.html'); return; }
+  const sesion = JSON.parse(sesionData);
+
+  // ── BUCKET (mismo que paginaprincipal) ────────────────────────────────────
+  const BUCKET = 'publicaciones-media';
+  const AVATAR_BUCKET = 'avatares'; // Crea este bucket en Supabase Storage → Public
+
+  // ── HELPERS ───────────────────────────────────────────────────────────────
+  function getAvatarURL(s) {
+    if (s && s.foto_perfil) return s.foto_perfil;
+    return `https://ui-avatars.com/api/?name=${encodeURIComponent(s.nombre || 'U')}&background=002f6c&color=c8a951&bold=true&size=128`;
+  }
+
+  function showToast(type, title, msg, duration = 3500) {
+    const icons = { error: '🚫', ok: '✅', warn: '⚠️' };
+    const c = document.getElementById('toast-container');
+    const t = document.createElement('div');
+    t.className = `toast ${type}`;
+    t.innerHTML = `
+      <span class="toast-icon">${icons[type]||'ℹ️'}</span>
+      <div class="toast-body">
+        <div class="toast-title">${title}</div>
+        ${msg ? `<div class="toast-msg">${msg}</div>` : ''}
+      </div>`;
+    c.appendChild(t);
+    setTimeout(() => {
+      t.classList.add('hide');
+      t.addEventListener('animationend', () => t.remove());
+    }, duration);
+  }
+
+  // ── POBLAR UI CON DATOS DE SESIÓN ─────────────────────────────────────────
+  function poblarPerfil(s) {
+    const avatar = getAvatarURL(s);
+
+    // Header nav
+    document.getElementById('nav-nombre').textContent = s.nombre?.split(' ')[0] || 'Perfil';
+    document.getElementById('nav-avatar').src = avatar;
+
+    // Hero
+    document.getElementById('avatar-grande').src = avatar;
+    document.getElementById('display-nombre').textContent = s.nombre || '—';
+    document.getElementById('display-email').textContent  = s.email  || '';
+
+    const bioEl = document.getElementById('display-bio');
+    if (s.descripcion) { bioEl.textContent = s.descripcion; bioEl.classList.remove('empty'); }
+else { bioEl.textContent = 'Sin biografía aún.'; bioEl.classList.add('empty'); }
+
+    // Fecha miembro
+    if (s.fecha_registro) {
+      const d = new Date(s.fecha_registro);
+      document.getElementById('stat-miembro').textContent =
+        d.toLocaleDateString('es-MX', { month: 'short', year: 'numeric' });
+    }
+
+    // Pre-llenar formulario de edición
+    document.getElementById('edit-nombre').value = s.nombre || '';
+    document.getElementById('edit-correo').value = s.email  || '';
+    document.getElementById('edit-bio').value = s.descripcion || '';
+ }
+
+  poblarPerfil(sesion);
+
+  // ── CARGAR DATOS FRESCOS DE SUPABASE 
+  async function cargarDatosPerfil() {
+    try {
+      const { data, error } = await window.supabaseClient
+        .from('usuarios')
+        .select('*')
+        .eq('id', sesion.id)
+        .single();
+      if (error) throw error;
+
+      // Actualizar localStorage con datos frescos
+      const sesionActualizada = { ...sesion, ...data };
+      localStorage.setItem('sesion', JSON.stringify(sesionActualizada));
+      poblarPerfil(sesionActualizada);
+    } catch (err) {
+      console.warn('No se pudo refrescar perfil:', err.message);
+      // Igual muestra lo que hay en localStorage
+    }
+  }
+
+  // ── MIS PUBLICACIONES 
+  async function cargarMisPublicaciones() {
+    const container = document.getElementById('mis-posts');
+    try {
+      const { data, error } = await window.supabaseClient
+        .from('publicaciones')
+        .select('*')
+        .eq('autor_id', sesion.id)
+        .order('creado_a_las', { ascending: false });
+
+      if (error) throw error;
+
+      // Actualizar stat de posts
+      document.getElementById('stat-posts').textContent = data.length;
+
+      // Sumar likes
+      const totalLikes = data.reduce((sum, p) => sum + (p.likes_count || 0), 0);
+      document.getElementById('stat-likes').textContent = totalLikes;
+
+      container.innerHTML = '';
+
+      if (data.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">📝</div>
+            <p>Aún no has publicado nada.<br>¡Comparte algo con la comunidad!</p>
+          </div>`;
+        return;
+      }
+
+      data.forEach(post => renderPost(post));
+
+    } catch (err) {
+      container.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">⚠️</div>
+          <p>No se pudieron cargar tus publicaciones.</p>
+        </div>`;
+      console.error(err.message);
+    }
+  }
+
+  function renderPost(post) {
+    const container = document.getElementById('mis-posts');
+    const fecha = new Date(post.creado_a_las).toLocaleString('es-MX', {
+      day: '2-digit', month: 'short', year: 'numeric',
+      hour: '2-digit', minute: '2-digit'
+    });
+    const avatar = getAvatarURL(sesion);
+    const card = document.createElement('div');
+    card.className = 'post-card';
+    card.id = `post-${post.id}`;
+    card.innerHTML = `
+      <div class="post-head">
+        <div class="post-author">
+          <div class="post-author-pic"><img src="${avatar}"></div>
+          <div>
+            <strong>${post.autor_nombre}</strong>
+            <div class="post-date">${fecha}</div>
+          </div>
+        </div>
+        <button class="btn-delete" onclick="eliminarPost(${post.id}, '${post.archivo_url || ''}')">Eliminar</button>
+      </div>
+      <p class="post-text">${post.contenido_texto || ''}</p>
+      ${post.archivo_url ? `<div class="post-img"><img src="${post.archivo_url}" loading="lazy"></div>` : ''}`;
+    container.appendChild(card);
+  }
+
+  // ── ELIMINAR POST 
+  window.eliminarPost = async function (postId, archivoUrl) {
+    if (!confirm('¿Eliminar esta publicación?')) return;
+    try {
+      const { error } = await window.supabaseClient
+        .from('publicaciones').delete()
+        .eq('id', postId).eq('autor_id', sesion.id);
+      if (error) throw error;
+
+      if (archivoUrl) {
+        const path = archivoUrl.split(`/${BUCKET}/`)[1];
+        if (path) await window.supabaseClient.storage.from(BUCKET).remove([path]);
+      }
+
+      document.getElementById(`post-${postId}`)?.remove();
+
+      // Actualizar contador
+      const cur = parseInt(document.getElementById('stat-posts').textContent) || 0;
+      document.getElementById('stat-posts').textContent = Math.max(0, cur - 1);
+
+      showToast('ok', 'Post eliminado', '');
+    } catch (err) {
+      showToast('error', 'Error al eliminar', err.message);
+    }
+  };
+
+  // ── TOGGLE EDICIÓN 
+  const editPanel  = document.getElementById('edit-panel');
+  const btnToggle  = document.getElementById('btn-toggle-edit');
+  const btnCancel  = document.getElementById('btn-cancel-edit');
+
+  btnToggle.addEventListener('click', () => {
+    editPanel.classList.toggle('open');
+    btnToggle.textContent = editPanel.classList.contains('open')
+      ? '✖ Cancelar edición' : '✏️ Editar perfil';
+    if (editPanel.classList.contains('open')) {
+      editPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
+
+  btnCancel.addEventListener('click', () => {
+    editPanel.classList.remove('open');
+    btnToggle.textContent = '✏️ Editar perfil';
+  });
+
+  // ── GUARDAR CAMBIOS DE PERFIL 
+  document.getElementById('btn-save-edit').addEventListener('click', async () => {
+    const nombre = document.getElementById('edit-nombre').value.trim();
+    const correo = document.getElementById('edit-correo').value.trim();
+    const bio    = document.getElementById('edit-bio').value.trim();
+    const pass   = document.getElementById('edit-pass').value;
+    const pass2  = document.getElementById('edit-pass2').value;
+
+    if (!nombre) { showToast('error', 'El nombre no puede estar vacío', ''); return; }
+    if (pass && pass !== pass2) { showToast('error', 'Las contraseñas no coinciden', ''); return; }
+    if (pass && pass.length < 6) { showToast('error', 'La contraseña debe tener al menos 6 caracteres', ''); return; }
+
+    const btn = document.getElementById('btn-save-edit');
+    btn.textContent = 'Guardando...'; btn.disabled = true;
+
+    try {
+      // Actualizar en Supabase
+      const updates = { nombre, email: correo, descripcion: bio };
+      if (pass) updates.password = pass; // solo si cambió
+
+      const { error } = await window.supabaseClient
+        .from('usuarios')
+        .update(updates)
+        .eq('id', sesion.id);
+
+      if (error) throw error;
+
+      // Actualizar localStorage
+      Object.assign(sesion, updates);
+      localStorage.setItem('sesion', JSON.stringify(sesion));
+
+      poblarPerfil(sesion);
+      editPanel.classList.remove('open');
+      btnToggle.textContent = '✏️ Editar perfil';
+
+      // Limpiar campos de contraseña
+      document.getElementById('edit-pass').value  = '';
+      document.getElementById('edit-pass2').value = '';
+
+      showToast('ok', '¡Perfil actualizado!', 'Tus datos han sido guardados.');
+    } catch (err) {
+      showToast('error', 'Error al guardar', err.message);
+    } finally {
+      btn.textContent = 'Guardar cambios'; btn.disabled = false;
+    }
+  });
+
+  // ── CAMBIAR FOTO DE PERFIL 
+  document.getElementById('avatar-file-input').addEventListener('change', async function () {
+    const file = this.files[0];
+    if (!file) return;
+
+    // Preview inmediato
+    const localURL = URL.createObjectURL(file);
+    document.getElementById('avatar-grande').src = localURL;
+    document.getElementById('nav-avatar').src    = localURL;
+
+    try {
+      const ext  = file.name.split('.').pop().toLowerCase();
+      const path = `${sesion.id}/avatar.${ext}`;
+
+      const { data, error } = await window.supabaseClient
+        .storage.from(AVATAR_BUCKET)
+        .upload(path, file, { upsert: true, contentType: file.type });
+
+      if (error) throw error;
+
+      const { data: urlData } = window.supabaseClient
+        .storage.from(AVATAR_BUCKET).getPublicUrl(data.path);
+
+      const fotoURL = urlData.publicUrl + '?t=' + Date.now(); // cache bust
+
+      // Guardar en DB y sesión
+      await window.supabaseClient
+        .from('usuarios').update({ foto_perfil: fotoURL }).eq('id', sesion.id);
+
+      sesion.foto_perfil = fotoURL;
+      localStorage.setItem('sesion', JSON.stringify(sesion));
+      document.getElementById('avatar-grande').src = fotoURL;
+      document.getElementById('nav-avatar').src    = fotoURL;
+
+      showToast('ok', 'Foto actualizada', '');
+    } catch (err) {
+      showToast('error', 'Error al subir foto', err.message);
+      // Revertir preview
+      document.getElementById('avatar-grande').src = getAvatarURL(sesion);
+      document.getElementById('nav-avatar').src    = getAvatarURL(sesion);
+    }
+    this.value = '';
+  });
+
+  // ── LOGOUT 
+  document.getElementById('btn-logout').addEventListener('click', () => {
+    localStorage.removeItem('sesion');
+    window.location.replace('index.html');
+  });
+
+  // ── INIT 
+  document.addEventListener('DOMContentLoaded', () => {
+    cargarDatosPerfil();
+    cargarMisPublicaciones();
+  });
+
+})();
+</script>
+</body>
+</html>
