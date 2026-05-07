@@ -24,32 +24,27 @@
     <p class="text-center text-muted mb-4 small">Solo comunidad UNAM</p>
 
     <form id="formRegistro">
-      <!-- Nombre -->
       <div class="mb-3">
         <label class="form-label small">Nombre completo</label>
         <input type="text" class="form-control" id="nombre" placeholder="Nombre Apellido" required>
       </div>
 
-      <!-- Fecha de Nacimiento -->
       <div class="mb-3">
-        <label class="form-label small">Fecha de nacimiento</label>
-        <input type="date" class="form-control" id="fecha_nacimiento" required>
+        <label class="form-label small fw-bold">Fecha de nacimiento</label>
+        <input type="date" id="fecha_nacimiento" class="form-control" required>
       </div>
 
-      <!-- Correo -->
       <div class="mb-3">
         <label class="form-label small">Correo institucional</label>
         <input type="email" class="form-control" id="email" placeholder="usuario@aragon.unam.mx" required>
         <div class="form-text" style="font-size: 0.7rem;">Usa tu correo @unam.mx o de tu facultad.</div>
       </div>
 
-      <!-- Cuenta -->
       <div class="mb-3">
         <label class="form-label small">Número de cuenta</label>
         <input type="text" class="form-control" id="cuenta" placeholder="9 dígitos" maxlength="9" required>
       </div>
 
-      <!-- Contraseña -->
       <div class="mb-4">
         <label class="form-label small">Contraseña segura</label>
         <div class="input-group">
@@ -81,6 +76,16 @@ const mensaje = document.getElementById("mensaje");
 const btnTogglePassword = document.getElementById("btnTogglePassword");
 const passwordEl = document.getElementById("password");
 const iconEye = document.getElementById("iconEye");
+
+// --- Restringir calendario a 17 años ---
+const fechaNacEl = document.getElementById("fecha_nacimiento");
+if (fechaNacEl) {
+    const hoy = new Date();
+    const anioLimite = hoy.getFullYear() - 17;
+    const mes = String(hoy.getMonth() + 1).padStart(2, '0');
+    const dia = String(hoy.getDate()).padStart(2, '0');
+    fechaNacEl.max = `${anioLimite}-${mes}-${dia}`;
+}
 
 // Ver/Ocultar Contraseña
 if (btnTogglePassword) {
@@ -124,6 +129,21 @@ form.addEventListener("submit", async function(e) {
     nombreEl.classList.add("is-invalid");
     return mostrarError("Nombre inválido (solo letras)");
   }
+
+  // VALIDACIÓN LÓGICA EDAD 17 AÑOS
+  const birthDate = new Date(fechaNacVal);
+  const today = new Date();
+  let edad = today.getFullYear() - birthDate.getFullYear();
+  const m = today.getMonth() - birthDate.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+      edad--;
+  }
+
+  if (edad < 17) {
+    fechaNacEl.classList.add("is-invalid");
+    return mostrarError("Debes tener al menos 17 años");
+  }
+
   if (!dominiosPermitidos.some(dom => emailVal.endsWith(dom))) {
     emailEl.classList.add("is-invalid");
     return mostrarError("Usa un correo institucional UNAM");
@@ -140,7 +160,6 @@ form.addEventListener("submit", async function(e) {
   try {
     if (!window.supabaseClient) throw new Error("Cliente no listo.");
 
-    // 🚀 CAMBIO CLAVE: Usamos Auth para el registro
     const { data, error } = await window.supabaseClient.auth.signUp({
       email: emailVal,
       password: passwordVal,
