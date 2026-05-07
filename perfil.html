@@ -639,556 +639,1059 @@
 <!-- ── SCRIPTS ── -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/conexion.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
 <script>
-(function () {
+
+(async function () {
+
+const BUCKET = 'publicaciones-media';
+
+// ─────────────────────────────────────────────
+// SESIÓN
+// ─────────────────────────────────────────────
 
 const sesionData = localStorage.getItem('sesion');
-
 const sessionId = localStorage.getItem('session_id');
 
 if (!sesionData || !sessionId) {
-
-cerrarSesionLocal();
-
-throw new Error("Sin sesión");
-
+    cerrarSesionLocal();
+    return;
 }
 
 const sesion = JSON.parse(sesionData);
 
-async function validarSesionActiva() {
-
-try {
-
-const { data, error } = await window.supabaseClient
-.from('usuarios')
-.select('sesiones_activas')
-.eq('id', sesion.id)
-.single();
-
-if (error) throw error;
-
-const sesiones = data?.sesiones_activas || [];
-
-const sigueActiva = sesiones.some(
-s => s.session_id === sessionId
-);
-
-if (!sigueActiva) {
-
-cerrarSesionLocal();
-
-return false;
-
-}
-
-return true;
-
-} catch {
-
-cerrarSesionLocal();
-
-return false;
-
-}
-
-}
-
 function cerrarSesionLocal() {
 
-localStorage.removeItem("sesion");
+    localStorage.removeItem("sesion");
+    localStorage.removeItem("session_id");
 
-localStorage.removeItem("session_id");
+    window.location.replace("index.html");
 
-window.location.replace("index.html");
+}
 
+async function validarSesionActiva() {
+
+    try {
+
+        const { data, error } = await window.supabaseClient
+            .from('usuarios')
+            .select('sesiones_activas')
+            .eq('id', sesion.id)
+            .single();
+
+        if (error) throw error;
+
+        const sesiones = Array.isArray(data?.sesiones_activas)
+            ? data.sesiones_activas
+            : [];
+
+        const sigueActiva = sesiones.some(
+            s => s.session_id === sessionId
+        );
+
+        if (!sigueActiva) {
+
+            cerrarSesionLocal();
+            return false;
+
+        }
+
+        return true;
+
+    } catch (err) {
+
+        console.error(err);
+
+        cerrarSesionLocal();
+
+        return false;
+    }
 }
 
 await validarSesionActiva();
 
-  // ── BUCKET (mismo que paginaprincipal) ────────────────────────────────────
-  const BUCKET = 'publicaciones-media';
-  const AVATAR_BUCKET = 'avatares'; // Crea este bucket en Supabase Storage → Public
+setInterval(validarSesionActiva, 15000);
 
-  // ── HELPERS ───────────────────────────────────────────────────────────────
-  function getAvatarURL(s) {
-    if (s && s.foto_perfil) return s.foto_perfil;
-    return `https://ui-avatars.com/api/?name=${encodeURIComponent(s.nombre || 'U')}&background=002f6c&color=c8a951&bold=true&size=128`;
-  }
+// ─────────────────────────────────────────────
+// UTILIDADES
+// ─────────────────────────────────────────────
 
-  function showToast(type, title, msg, duration = 3500) {
-    const icons = { error: '🚫', ok: '✅', warn: '⚠️' };
-    const c = document.getElementById('toast-container');
-    const t = document.createElement('div');
-    t.className = `toast ${type}`;
-    t.innerHTML = `
-      <span class="toast-icon">${icons[type]||'ℹ️'}</span>
-      <div class="toast-body">
-        <div class="toast-title">${title}</div>
-        ${msg ? `<div class="toast-msg">${msg}</div>` : ''}
-      </div>`;
-    c.appendChild(t);
-    setTimeout(() => {
-      t.classList.add('hide');
-      t.addEventListener('animationend', () => t.remove());
-    }, duration);
-  }
+const getInst = (email) => {
 
-  // ── POBLAR UI CON DATOS DE SESIÓN ─────────────────────────────────────────
-  function poblarPerfil(s) {
-    const avatar = getAvatarURL(s);
+    if (email?.endsWith('@aragon.unam.mx')) return "FES Aragón";
+    if (email?.endsWith('@ingenieria.unam.mx')) return "Facultad de Ingeniería";
 
-    // Header nav
-    document.getElementById('nav-nombre').textContent = s.nombre?.split(' ')[0] || 'Perfil';
-    document.getElementById('nav-avatar').src = avatar;
+    return "Comunidad UNAM";
+};
 
-    // Hero
-    document.getElementById('avatar-grande').src = avatar;
-    document.getElementById('display-nombre').textContent = s.nombre || '—';
-    document.getElementById('display-email').textContent  = s.email  || '';
+function getProfilePhoto(user = sesion) {
 
-    // Bio — campo real en DB es 'descripcion'
-    const bioEl = document.getElementById('display-bio');
-    const bioVal = s.descripcion || s.bio || '';
-    if (bioVal) {
-      bioEl.textContent = bioVal;
-      bioEl.classList.remove('empty');
-    } else {
-      bioEl.textContent = 'Sin biografía aún.';
-      bioEl.classList.add('empty');
-    }
+    return user.foto_perfil ||
+        `https://ui-avatars.com/api/?name=${encodeURIComponent(user.nombre)}&background=c8a951&color=000&bold=true`;
 
-    // Fecha miembro
-    if (s.fecha_registro) {
-      const d = new Date(s.fecha_registro);
-      document.getElementById('stat-miembro').textContent =
-        d.toLocaleDateString('es-MX', { month: 'short', year: 'numeric' });
-    }
+}
 
-    // Pre-llenar formulario de edición
-    document.getElementById('edit-nombre').value = s.nombre       || '';
-    document.getElementById('edit-correo').value = s.email        || '';
-    document.getElementById('edit-bio').value    = s.descripcion  || s.bio || '';
+// ─────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────
 
-    // Siempre poblar detalles académicos también
-    poblarDetalles(s);
-  }
+async function init() {
 
-  poblarPerfil(sesion);
+    renderUserHeader();
 
+    await cargarPublicaciones();
 
-  // ── INSTITUCIÓN POR CORREO (igual que perfil viejo) ──────────────────────
-  function obtenerInstitucion(email) {
-    if (!email) return 'Comunidad UNAM';
-    if (email.endsWith('@aragon.unam.mx'))       return 'FES Aragón';
-    if (email.endsWith('@ingenieria.unam.mx'))   return 'Facultad de Ingeniería';
-    if (email.endsWith('@ciencias.unam.mx'))     return 'Facultad de Ciencias';
-    if (email.endsWith('@comunidad.unam.mx'))    return 'UNAM Central';
-    if (email.endsWith('@unam.mx'))              return 'UNAM';
-    return 'Comunidad UNAM';
-  }
+    cargarNotificaciones();
 
-  // ── POBLAR DETALLES ACADÉMICOS ────────────────────────────────────────────
-  function poblarDetalles(s) {
-    document.getElementById('det-email').textContent       = s.email         || '—';
-    document.getElementById('det-institucion').textContent = obtenerInstitucion(s.email);
-    document.getElementById('det-cuenta').textContent      = s.numero_cuenta || '—';
-    document.getElementById('det-privacidad').textContent  = s.privacidad    || '—';
+    cargarSugerencias();
 
-    const estadoEl = document.getElementById('det-estado');
-    const activo   = (s.estado || '').toLowerCase() === 'activo';
-    estadoEl.textContent = s.estado || 'Activo';
-    estadoEl.className   = 'badge-estado ' + (activo ? 'badge-activo' : 'badge-inactivo');
-  }
+    setupSearch();
+}
 
-  // ── SESIONES ACTIVAS ──────────────────────────────────────────────────────
-  // Guardamos cada sesión como un objeto en el array "sesiones_activas" en la
-  // tabla usuarios. Formato: [{ token, dispositivo, ip, fecha }]
-  // Si aún no tienes esa columna solo mostramos la sesión actual.
+init();
 
-  async function cargarSesiones() {
-    const lista = document.getElementById('sesiones-lista');
-    const btnTodas = document.getElementById('btn-cerrar-todas');
+// ─────────────────────────────────────────────
+// HEADER
+// ─────────────────────────────────────────────
 
-    try {
-      const { data, error } = await window.supabaseClient
-        .from('usuarios')
-        .select('sesiones_activas')
-        .eq('id', sesion.id)
-        .single();
+function renderUserHeader() {
 
-      if (error) throw error;
+    const avatar = getProfilePhoto();
 
-      let sesiones = data.sesiones_activas || [];
+    document.getElementById("authArea").innerHTML = `
+    <div class="dropdown">
 
-      // Si está vacío igual mostramos la sesión actual como "Esta sesión"
-      if (!Array.isArray(sesiones) || sesiones.length === 0) {
-        sesiones = [{
-          token: 'current',
-          dispositivo: navigator.platform || 'Navegador',
-          fecha: new Date().toISOString(),
-          actual: true
-        }];
-      } else {
-        // Marcar cuál es la actual (la más reciente o la que coincide con el token guardado)
-sesiones = sesiones.map(s => ({
-...s,
-actual: s.session_id === sessionId
-}));
-      }
+        <div class="d-flex align-items-center gap-2 cursor-pointer"
+            data-bs-toggle="dropdown">
 
-      renderSesiones(sesiones);
-      if (sesiones.length > 1) btnTodas.style.display = 'block';
+            <span class="small fw-bold d-none d-md-block">
+                ${sesion.nombre.split(' ')[0]}
+            </span>
 
-    } catch (err) {
-      // Fallback: mostrar solo la sesión actual sin datos de DB
-      lista.innerHTML = `
-        <div class="sesion-item">
-          <div class="sesion-dot"></div>
-          <div class="sesion-info">
-            <div class="sesion-nombre">Esta sesión <span style="color:var(--gold);font-size:10px">● Actual</span></div>
-            <div class="sesion-meta">${navigator.platform || 'Navegador'}</div>
-          </div>
-        </div>`;
-    }
-  }
+            <img
+                src="${avatar}"
+                class="rounded-circle border border-warning"
+                width="36"
+                height="36"
+                style="object-fit:cover;"
+            >
 
-  // Iconos por tipo de dispositivo/navegador
-  function iconoDispositivo(s) {
-    const d = (s.dispositivo || '').toLowerCase();
-    if (d.includes('móvil') || d.includes('movil') || d.includes('iphone') || d.includes('android')) return '📱';
-    if (d.includes('tablet') || d.includes('ipad')) return '📟';
-    return '🖥️';
-  }
-  function iconoNavegador(s) {
-    const n = (s.navegador || '').toLowerCase();
-    if (n.includes('chrome'))  return 'Chrome';
-    if (n.includes('firefox')) return 'Firefox';
-    if (n.includes('safari'))  return 'Safari';
-    if (n.includes('edge'))    return 'Edge';
-    return s.navegador || 'Navegador';
-  }
-
-  function renderSesiones(sesiones) {
-    const lista = document.getElementById('sesiones-lista');
-    if (!sesiones.length) {
-      lista.innerHTML = '<div class="sesiones-empty">Sin sesiones registradas</div>';
-      return;
-    }
-
-    lista.innerHTML = sesiones.map((s, idx) => {
-      const fecha = s.fecha
-        ? new Date(s.fecha).toLocaleString('es-MX', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' })
-        : '—';
-      const esActual = s.actual;
-      const icono    = iconoDispositivo(s);
-      const nav      = iconoNavegador(s);
-      const plat     = s.plataforma ? ` · ${s.plataforma}` : '';
-      return `
-        <div class="sesion-item" id="sesion-item-${idx}">
-          <div class="sesion-dot ${esActual ? '' : 'inactiva'}"></div>
-          <div class="sesion-info">
-            <div class="sesion-nombre">
-              ${icono} ${s.dispositivo || 'Escritorio'} · ${nav}
-              ${esActual ? '<span style="color:var(--gold);font-size:10px"> ● Actual</span>' : ''}
-            </div>
-            <div class="sesion-meta">${fecha}${plat}</div>
-          </div>
-          ${!esActual
-            ? `<button class="btn-close-sesion" onclick="cerrarSesion(${idx})">Cerrar</button>`
-            : ''}
-        </div>`;
-    }).join('');
-  }
-
-  window.cerrarSesion = async function(idx) {
-    try {
-      const { data } = await window.supabaseClient
-        .from('usuarios').select('sesiones_activas').eq('id', sesion.id).single();
-
-      let sesiones = data?.sesiones_activas || [];
-      sesiones.splice(idx, 1);
-
-      await window.supabaseClient
-        .from('usuarios')
-        .update({ sesiones_activas: sesiones })
-        .eq('id', sesion.id);
-
-      document.getElementById(`sesion-item-${idx}`)?.remove();
-      showToast('ok', 'Sesión cerrada', '');
-
-      // Si solo queda 1, ocultar botón cerrar todas
-      const remaining = document.querySelectorAll('.sesion-item').length;
-      if (remaining <= 1) document.getElementById('btn-cerrar-todas').style.display = 'none';
-
-    } catch (err) {
-      showToast('error', 'Error al cerrar sesión', err.message);
-    }
-  };
-
-  document.getElementById('btn-cerrar-todas').addEventListener('click', async () => {
-    if (!confirm('¿Cerrar todas las sesiones excepto la actual?')) return;
-    try {
-      // Conservar solo la sesión actual (índice 0)
-      const { data } = await window.supabaseClient
-        .from('usuarios').select('sesiones_activas').eq('id', sesion.id).single();
-
-      const sesiones = data?.sesiones_activas || [];
-      const soloActual = sesiones.length > 0 ? [sesiones[0]] : [];
-
-      await window.supabaseClient
-        .from('usuarios')
-        .update({ sesiones_activas: soloActual })
-        .eq('id', sesion.id);
-
-      cargarSesiones();
-      showToast('ok', 'Sesiones cerradas', 'Solo queda tu sesión actual activa.');
-    } catch (err) {
-      showToast('error', 'Error', err.message);
-    }
-  });
-
-  // ── CARGAR DATOS FRESCOS DE SUPABASE ──────────────────────────────────────
-  async function cargarDatosPerfil() {
-    try {
-      const { data, error } = await window.supabaseClient
-        .from('usuarios')
-        .select('*')
-        .eq('id', sesion.id)
-        .single();
-      if (error) throw error;
-
-      // Actualizar localStorage con datos frescos
-      // data viene de SELECT * así que tiene: numero_cuenta, estado, privacidad, descripcion, etc.
-      const sesionActualizada = { ...sesion, ...data };
-      // Actualizar el objeto sesion en memoria para que otras funciones lo usen
-      Object.assign(sesion, sesionActualizada);
-      localStorage.setItem('sesion', JSON.stringify(sesionActualizada));
-      poblarPerfil(sesionActualizada);
-    } catch (err) {
-      console.warn('No se pudo refrescar perfil:', err.message);
-      // Igual muestra lo que hay en localStorage
-    }
-  }
-
-  // ── MIS PUBLICACIONES ─────────────────────────────────────────────────────
-  async function cargarMisPublicaciones() {
-    const container = document.getElementById('mis-posts');
-    try {
-      const { data, error } = await window.supabaseClient
-        .from('publicaciones')
-        .select('*')
-        .eq('autor_id', sesion.id)
-        .order('creado_a_las', { ascending: false });
-
-      if (error) throw error;
-
-      // Actualizar stat de posts
-      document.getElementById('stat-posts').textContent = data.length;
-
-      // Sumar likes
-      const totalLikes = data.reduce((sum, p) => sum + (p.likes_count || 0), 0);
-      document.getElementById('stat-likes').textContent = totalLikes;
-
-      container.innerHTML = '';
-
-      if (data.length === 0) {
-        container.innerHTML = `
-          <div class="empty-state">
-            <div class="empty-icon">📝</div>
-            <p>Aún no has publicado nada.<br>¡Comparte algo con la comunidad!</p>
-          </div>`;
-        return;
-      }
-
-      data.forEach(post => renderPost(post));
-
-    } catch (err) {
-      container.innerHTML = `
-        <div class="empty-state">
-          <div class="empty-icon">⚠️</div>
-          <p>No se pudieron cargar tus publicaciones.</p>
-        </div>`;
-      console.error(err.message);
-    }
-  }
-
-  function renderPost(post) {
-    const container = document.getElementById('mis-posts');
-    const fecha = new Date(post.creado_a_las).toLocaleString('es-MX', {
-      day: '2-digit', month: 'short', year: 'numeric',
-      hour: '2-digit', minute: '2-digit'
-    });
-    const avatar = getAvatarURL(sesion);
-    const card = document.createElement('div');
-    card.className = 'post-card';
-    card.id = `post-${post.id}`;
-    card.innerHTML = `
-      <div class="post-head">
-        <div class="post-author">
-          <div class="post-author-pic"><img src="${avatar}"></div>
-          <div>
-            <strong>${post.autor_nombre}</strong>
-            <div class="post-date">${fecha}</div>
-          </div>
         </div>
-        <button class="btn-delete" onclick="eliminarPost(${post.id}, '${post.archivo_url || ''}')">Eliminar</button>
-      </div>
-      <p class="post-text">${post.contenido_texto || ''}</p>
-      ${post.archivo_url ? `<div class="post-img"><img src="${post.archivo_url}" loading="lazy"></div>` : ''}`;
-    container.appendChild(card);
-  }
 
-  // ── ELIMINAR POST ─────────────────────────────────────────────────────────
-  window.eliminarPost = async function (postId, archivoUrl) {
-    if (!confirm('¿Eliminar esta publicación?')) return;
-    try {
-      const { error } = await window.supabaseClient
-        .from('publicaciones').delete()
-        .eq('id', postId).eq('autor_id', sesion.id);
-      if (error) throw error;
+        <ul class="dropdown-menu dropdown-menu-end shadow-lg mt-2"
+            style="background: var(--surface2); border: 1px solid var(--border);">
 
-      if (archivoUrl) {
-        const path = archivoUrl.split(`/${BUCKET}/`)[1];
-        if (path) await window.supabaseClient.storage.from(BUCKET).remove([path]);
-      }
+            <li class="p-3 text-center">
 
-      document.getElementById(`post-${postId}`)?.remove();
+                <img
+                    src="${avatar}"
+                    class="rounded-circle mb-2"
+                    width="55"
+                    height="55"
+                    style="object-fit:cover;"
+                >
 
-      // Actualizar contador
-      const cur = parseInt(document.getElementById('stat-posts').textContent) || 0;
-      document.getElementById('stat-posts').textContent = Math.max(0, cur - 1);
+                <div class="fw-bold text-white small">
+                    ${sesion.nombre}
+                </div>
 
-      showToast('ok', 'Post eliminado', '');
-    } catch (err) {
-      showToast('error', 'Error al eliminar', err.message);
-    }
-  };
+                <div class="text-gold"
+                    style="font-size: 10px; color: var(--gold)">
+                    ${getInst(sesion.email)}
+                </div>
 
-  // ── TOGGLE EDICIÓN ────────────────────────────────────────────────────────
-  const editPanel  = document.getElementById('edit-panel');
-  const btnToggle  = document.getElementById('btn-toggle-edit');
-  const btnCancel  = document.getElementById('btn-cancel-edit');
+            </li>
 
-  btnToggle.addEventListener('click', () => {
-    editPanel.classList.toggle('open');
-    btnToggle.textContent = editPanel.classList.contains('open')
-      ? '✖ Cancelar edición' : '✏️ Editar perfil';
-    if (editPanel.classList.contains('open')) {
-      editPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  });
+            <li><hr class="dropdown-divider opacity-10"></li>
 
-  btnCancel.addEventListener('click', () => {
-    editPanel.classList.remove('open');
-    btnToggle.textContent = '✏️ Editar perfil';
-  });
+            <li>
+                <a class="dropdown-item small" href="perfil.html">
+                    Ver Perfil
+                </a>
+            </li>
 
-  // ── GUARDAR CAMBIOS DE PERFIL ─────────────────────────────────────────────
-  document.getElementById('btn-save-edit').addEventListener('click', async () => {
-    const nombre = document.getElementById('edit-nombre').value.trim();
-    const correo = document.getElementById('edit-correo').value.trim();
-    const bio    = document.getElementById('edit-bio').value.trim();
-    const pass   = document.getElementById('edit-pass').value;
-    const pass2  = document.getElementById('edit-pass2').value;
+            <li>
+                <button
+                    class="dropdown-item small text-danger"
+                    onclick="logout()"
+                >
+                    Cerrar Sesión
+                </button>
+            </li>
 
-    if (!nombre) { showToast('error', 'El nombre no puede estar vacío', ''); return; }
-    if (pass && pass !== pass2) { showToast('error', 'Las contraseñas no coinciden', ''); return; }
-    if (pass && pass.length < 6) { showToast('error', 'La contraseña debe tener al menos 6 caracteres', ''); return; }
+        </ul>
 
-    const btn = document.getElementById('btn-save-edit');
-    btn.textContent = 'Guardando...'; btn.disabled = true;
+    </div>`;
+}
 
-    try {
-      // Actualizar en Supabase
-      const updates = { nombre, email: correo, bio };
-      if (pass) updates.password = pass; // solo si cambió
+// ─────────────────────────────────────────────
+// PREVIEW PUBLICACIÓN
+// ─────────────────────────────────────────────
 
-      const { error } = await window.supabaseClient
-        .from('usuarios')
-        .update(updates)
-        .eq('id', sesion.id);
+const postFile = document.getElementById("postFile");
+const filePreview = document.getElementById("filePreview");
 
-      if (error) throw error;
+const removeBtn = document.createElement("button");
 
-      // Actualizar localStorage
-      Object.assign(sesion, updates);
-      localStorage.setItem('sesion', JSON.stringify(sesion));
+removeBtn.className =
+    "btn btn-sm btn-outline-danger mt-2 d-none";
 
-      poblarPerfil(sesion);
-      editPanel.classList.remove('open');
-      btnToggle.textContent = '✏️ Editar perfil';
+removeBtn.innerText = "Eliminar archivo";
 
-      // Limpiar campos de contraseña
-      document.getElementById('edit-pass').value  = '';
-      document.getElementById('edit-pass2').value = '';
+filePreview.after(removeBtn);
 
-      showToast('ok', '¡Perfil actualizado!', 'Tus datos han sido guardados.');
-    } catch (err) {
-      showToast('error', 'Error al guardar', err.message);
-    } finally {
-      btn.textContent = 'Guardar cambios'; btn.disabled = false;
-    }
-  });
+postFile.addEventListener("change", () => {
 
-  // ── CAMBIAR FOTO DE PERFIL ────────────────────────────────────────────────
-  document.getElementById('avatar-file-input').addEventListener('change', async function () {
-    const file = this.files[0];
+    const file = postFile.files[0];
+
     if (!file) return;
 
-    // Preview inmediato
-    const localURL = URL.createObjectURL(file);
-    document.getElementById('avatar-grande').src = localURL;
-    document.getElementById('nav-avatar').src    = localURL;
+    const url = URL.createObjectURL(file);
+
+    if (file.type.startsWith("video")) {
+
+        filePreview.innerHTML = `
+        <video
+            src="${url}"
+            controls
+            class="post-media"
+            style="
+                width:100%;
+                max-height:500px;
+                object-fit:contain;
+                background:black;
+                border-radius:12px;
+            "
+        ></video>
+        `;
+
+    } else {
+
+        filePreview.innerHTML = `
+        <img
+            src="${url}"
+            class="post-media"
+            style="
+                width:100%;
+                max-height:500px;
+                object-fit:contain;
+                background:black;
+                border-radius:12px;
+            "
+        >
+        `;
+    }
+
+    removeBtn.classList.remove("d-none");
+
+});
+
+removeBtn.onclick = () => {
+
+    postFile.value = "";
+
+    filePreview.innerHTML = "";
+
+    removeBtn.classList.add("d-none");
+
+};
+
+// ─────────────────────────────────────────────
+// PUBLICAR
+// ─────────────────────────────────────────────
+
+document.getElementById("btnPublicar").onclick = async () => {
+
+    const btn = document.getElementById("btnPublicar");
+
+    const txt =
+        document.getElementById("postContent").value.trim();
+
+    const file = postFile.files[0];
+
+    if (!txt && !file) return;
+
+    btn.disabled = true;
+    btn.innerText = "Publicando...";
 
     try {
-      const ext  = file.name.split('.').pop().toLowerCase();
-      const path = `${sesion.id}/avatar.${ext}`;
 
-      const { data, error } = await window.supabaseClient
-        .storage.from(AVATAR_BUCKET)
-        .upload(path, file, { upsert: true, contentType: file.type });
+        let url = null;
+        let type = null;
 
-      if (error) throw error;
+        if (file) {
 
-      const { data: urlData } = window.supabaseClient
-        .storage.from(AVATAR_BUCKET).getPublicUrl(data.path);
+            const path =
+                `posts/${Date.now()}_${file.name}`;
 
-      const fotoURL = urlData.publicUrl + '?t=' + Date.now(); // cache bust
+            const { error: uploadError } =
+                await window.supabaseClient.storage
+                    .from(BUCKET)
+                    .upload(path, file);
 
-      // Guardar en DB y sesión
-      await window.supabaseClient
-        .from('usuarios').update({ foto_perfil: fotoURL }).eq('id', sesion.id);
+            if (uploadError) throw uploadError;
 
-      sesion.foto_perfil = fotoURL;
-      localStorage.setItem('sesion', JSON.stringify(sesion));
-      document.getElementById('avatar-grande').src = fotoURL;
-      document.getElementById('nav-avatar').src    = fotoURL;
+            url = window.supabaseClient.storage
+                .from(BUCKET)
+                .getPublicUrl(path).data.publicUrl;
 
-      showToast('ok', 'Foto actualizada', '');
+            type = file.type;
+        }
+
+        const { error } =
+            await window.supabaseClient
+                .from('publicaciones')
+                .insert([{
+
+                    autor_id: sesion.id,
+
+                    autor_nombre: sesion.nombre,
+
+                    autor_foto: sesion.foto_perfil || null,
+
+                    contenido_texto: txt,
+
+                    archivo_url: url,
+
+                    tipo_archivo: type
+
+                }]);
+
+        if (error) throw error;
+
+        document.getElementById("postContent").value = "";
+
+        postFile.value = "";
+
+        filePreview.innerHTML = "";
+
+        removeBtn.classList.add("d-none");
+
+        await cargarPublicaciones();
+
     } catch (err) {
-      showToast('error', 'Error al subir foto', err.message);
-      // Revertir preview
-      document.getElementById('avatar-grande').src = getAvatarURL(sesion);
-      document.getElementById('nav-avatar').src    = getAvatarURL(sesion);
+
+        console.error(err);
+
+    } finally {
+
+        btn.disabled = false;
+
+        btn.innerText = "Publicar";
     }
-    this.value = '';
-  });
+};
 
-  // ── LOGOUT ────────────────────────────────────────────────────────────────
-  document.getElementById('btn-logout').addEventListener('click', () => {
-    localStorage.removeItem('sesion');
-    window.location.replace('index.html');
-  });
+// ─────────────────────────────────────────────
+// CARGAR POSTS
+// ─────────────────────────────────────────────
 
-  // ── INIT ──────────────────────────────────────────────────────────────────
-  document.addEventListener('DOMContentLoaded', () => {
-    cargarDatosPerfil();
-    cargarMisPublicaciones();
-    cargarSesiones();
-  });
+async function cargarPublicaciones() {
+
+    const feed =
+        document.getElementById("feedPublicaciones");
+
+    feed.innerHTML = `
+    <div class="text-center p-5">
+        <div class="spinner-border"
+            style="color:var(--gold)">
+        </div>
+    </div>`;
+
+    const { data: posts, error } =
+        await window.supabaseClient
+            .from('publicaciones')
+            .select('*')
+            .order('creado_a_las', { ascending: false });
+
+    if (error) {
+
+        feed.innerHTML = `
+        <div class="text-center p-4 text-danger">
+            Error cargando publicaciones
+        </div>`;
+
+        return;
+    }
+
+    feed.innerHTML = "";
+
+    if (!posts.length) {
+
+        feed.innerHTML = `
+        <div class="text-center p-5 text-muted">
+            No hay publicaciones
+        </div>`;
+
+        return;
+    }
+
+    posts.forEach(p => {
+
+        const esMio = p.autor_id === sesion.id;
+
+        const fecha =
+            new Date(p.creado_a_las).toLocaleString();
+
+        let media = "";
+
+        if (p.archivo_url) {
+
+            if (p.tipo_archivo?.startsWith("video")) {
+
+                media = `
+                <video
+                    src="${p.archivo_url}"
+                    controls
+                    class="post-media"
+                    style="
+                        width:100%;
+                        max-height:650px;
+                        object-fit:contain;
+                        background:black;
+                        border-radius:12px;
+                    "
+                ></video>
+                `;
+
+            } else {
+
+                media = `
+                <img
+                    src="${p.archivo_url}"
+                    class="post-media"
+                    style="
+                        width:100%;
+                        max-height:650px;
+                        object-fit:contain;
+                        background:black;
+                        border-radius:12px;
+                    "
+                >
+                `;
+            }
+        }
+
+        const div = document.createElement("div");
+
+        div.className = "custom-card";
+
+        div.id = `post-${p.id}`;
+
+        div.innerHTML = `
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+
+            <div
+                class="d-flex align-items-center gap-2"
+                style="cursor:pointer"
+                onclick="location.href='perfil.html?id=${p.autor_id}'"
+            >
+
+                <img
+                    src="${p.autor_foto || `https://ui-avatars.com/api/?name=${encodeURIComponent(p.autor_nombre)}&background=random`}"
+                    class="rounded-circle"
+                    width="38"
+                    height="38"
+                    style="object-fit:cover;"
+                >
+
+                <div>
+
+                    <h6 class="mb-0 fw-bold small">
+                        ${p.autor_nombre}
+                    </h6>
+
+                    <small class="text-muted" style="font-size:10px;">
+                        ${fecha}
+                    </small>
+
+                </div>
+
+            </div>
+
+            ${esMio ? `
+
+            <div class="d-flex gap-2">
+
+                <button
+                    class="btn btn-sm btn-warning"
+                    onclick="editarPost(${p.id})"
+                >
+                    <i class="bi bi-pencil"></i>
+                </button>
+
+                <button
+                    class="btn btn-sm btn-danger"
+                    onclick="eliminarPost(${p.id})"
+                >
+                    <i class="bi bi-trash"></i>
+                </button>
+
+            </div>
+
+            ` : ''}
+
+        </div>
+
+        <p style="line-height:1.6;">
+            ${p.contenido_texto || ''}
+        </p>
+
+        ${media}
+        `;
+
+        feed.appendChild(div);
+
+    });
+
+}
+
+// ─────────────────────────────────────────────
+// EDITAR
+// ─────────────────────────────────────────────
+
+let editingPost = null;
+
+let nuevaImagenEditar = null;
+
+let eliminarMediaActual = false;
+
+window.editarPost = async (postId) => {
+
+    const { data: post } =
+        await window.supabaseClient
+            .from("publicaciones")
+            .select("*")
+            .eq("id", postId)
+            .single();
+
+    if (!post) return;
+
+    editingPost = post;
+
+    nuevaImagenEditar = null;
+
+    eliminarMediaActual = false;
+
+    document.getElementById("editPostText").value =
+        post.contenido_texto || "";
+
+    renderEditPreview(post.archivo_url, post.tipo_archivo);
+
+    const modal =
+        new bootstrap.Modal(
+            document.getElementById("editPostModal")
+        );
+
+    modal.show();
+
+};
+
+function renderEditPreview(url, tipo) {
+
+    const preview =
+        document.getElementById("editPreview");
+
+    if (!url) {
+
+        preview.innerHTML = `
+        <div class="text-muted small text-center py-4">
+            Sin archivo
+        </div>
+        `;
+
+        return;
+    }
+
+    if (tipo?.startsWith("video")) {
+
+        preview.innerHTML = `
+        <video
+            src="${url}"
+            controls
+            class="post-media"
+            style="
+                width:100%;
+                max-height:400px;
+                object-fit:contain;
+                background:black;
+                border-radius:12px;
+            "
+        ></video>
+        `;
+
+    } else {
+
+        preview.innerHTML = `
+        <img
+            src="${url}"
+            class="post-media"
+            style="
+                width:100%;
+                max-height:400px;
+                object-fit:contain;
+                background:black;
+                border-radius:12px;
+            "
+        >
+        `;
+    }
+}
+
+document.getElementById("editFile")
+    .addEventListener("change", (e) => {
+
+        const file = e.target.files[0];
+
+        if (!file) return;
+
+        nuevaImagenEditar = file;
+
+        eliminarMediaActual = false;
+
+        const url = URL.createObjectURL(file);
+
+        renderEditPreview(url, file.type);
+
+    });
+
+document.getElementById("btnRemoveCurrentMedia")
+    .onclick = () => {
+
+        eliminarMediaActual = true;
+
+        nuevaImagenEditar = null;
+
+        document.getElementById("editFile").value = "";
+
+        renderEditPreview(null, null);
+
+    };
+
+document.getElementById("btnSaveEdit")
+    .onclick = async () => {
+
+        if (!editingPost) return;
+
+        const btn =
+            document.getElementById("btnSaveEdit");
+
+        btn.disabled = true;
+
+        btn.innerText = "Guardando...";
+
+        try {
+
+            let archivo_url = editingPost.archivo_url;
+
+            let tipo_archivo = editingPost.tipo_archivo;
+
+            if (eliminarMediaActual && archivo_url) {
+
+                const path =
+                    archivo_url.split(`/storage/v1/object/public/${BUCKET}/`)[1];
+
+                if (path) {
+
+                    await window.supabaseClient.storage
+                        .from(BUCKET)
+                        .remove([path]);
+
+                }
+
+                archivo_url = null;
+
+                tipo_archivo = null;
+            }
+
+            if (nuevaImagenEditar) {
+
+                const path =
+                    `posts/${Date.now()}_${nuevaImagenEditar.name}`;
+
+                await window.supabaseClient.storage
+                    .from(BUCKET)
+                    .upload(path, nuevaImagenEditar);
+
+                archivo_url =
+                    window.supabaseClient.storage
+                        .from(BUCKET)
+                        .getPublicUrl(path).data.publicUrl;
+
+                tipo_archivo =
+                    nuevaImagenEditar.type;
+            }
+
+            await window.supabaseClient
+                .from("publicaciones")
+                .update({
+
+                    contenido_texto:
+                        document.getElementById("editPostText").value,
+
+                    archivo_url,
+
+                    tipo_archivo
+
+                })
+                .eq("id", editingPost.id)
+                .eq("autor_id", sesion.id);
+
+            bootstrap.Modal
+                .getInstance(
+                    document.getElementById("editPostModal")
+                )
+                .hide();
+
+            editingPost = null;
+
+            await cargarPublicaciones();
+
+        } catch (err) {
+
+            console.error(err);
+
+        } finally {
+
+            btn.disabled = false;
+
+            btn.innerText = "Guardar cambios";
+
+        }
+
+    };
+
+document
+    .getElementById("editPostModal")
+    .addEventListener("hidden.bs.modal", () => {
+
+        editingPost = null;
+
+        nuevaImagenEditar = null;
+
+        eliminarMediaActual = false;
+
+        document.getElementById("editFile").value = "";
+
+    });
+
+// ─────────────────────────────────────────────
+// ELIMINAR
+// ─────────────────────────────────────────────
+
+window.eliminarPost = async (postId) => {
+
+    const confirmar = confirm("¿Eliminar publicación?");
+
+    if (!confirmar) return;
+
+    const { data: post } =
+        await window.supabaseClient
+            .from("publicaciones")
+            .select("archivo_url")
+            .eq("id", postId)
+            .single();
+
+    if (post?.archivo_url) {
+
+        const path =
+            post.archivo_url
+                .split(`/storage/v1/object/public/${BUCKET}/`)[1];
+
+        if (path) {
+
+            await window.supabaseClient.storage
+                .from(BUCKET)
+                .remove([path]);
+
+        }
+    }
+
+    await window.supabaseClient
+        .from("publicaciones")
+        .delete()
+        .eq("id", postId)
+        .eq("autor_id", sesion.id);
+
+    document.getElementById(`post-${postId}`)?.remove();
+
+};
+
+// ─────────────────────────────────────────────
+// LOGOUT
+// ─────────────────────────────────────────────
+
+window.logout = async () => {
+
+    try {
+
+        const { data } = await window.supabaseClient
+            .from('usuarios')
+            .select('sesiones_activas')
+            .eq('id', sesion.id)
+            .single();
+
+        let sesiones = data?.sesiones_activas || [];
+
+        sesiones = sesiones.filter(
+            s => s.session_id !== sessionId
+        );
+
+        await window.supabaseClient
+            .from('usuarios')
+            .update({
+                sesiones_activas: sesiones
+            })
+            .eq('id', sesion.id);
+
+    } catch (err) {
+
+        console.error(err);
+
+    }
+
+    cerrarSesionLocal();
+};
+
+// ─────────────────────────────────────────────
+// NOTIFICACIONES
+// ─────────────────────────────────────────────
+
+async function cargarNotificaciones() {
+
+    const { data: notifs } =
+        await window.supabaseClient
+            .from('notificaciones')
+            .select('*')
+            .eq('usuario_id', sesion.id)
+            .order('creado_a_las', { ascending: false })
+            .limit(8);
+
+    const badge =
+        document.getElementById("badge-notificaciones");
+
+    const lista =
+        document.getElementById("lista-notificaciones");
+
+    const unread =
+        notifs?.filter(n => !n.leida).length || 0;
+
+    badge.innerText = unread;
+
+    unread > 0
+        ? badge.classList.remove("d-none")
+        : badge.classList.add("d-none");
+
+    lista.innerHTML = notifs?.length ?
+
+        notifs.map(n => `
+        <li class="p-2 small border-bottom border-secondary">
+            <b>${n.emisor_nombre}</b> ${n.tipo}
+        </li>
+        `).join('')
+
+        :
+
+        '<li class="text-center p-3 small">Sin novedades</li>';
+
+}
+
+// ─────────────────────────────────────────────
+// SUGERENCIAS
+// ─────────────────────────────────────────────
+
+async function cargarSugerencias() {
+
+    const { data: users } =
+        await window.supabaseClient
+            .from('usuarios')
+            .select('id, nombre, email')
+            .neq('id', sesion.id)
+            .limit(5);
+
+    document.getElementById("listaSugerencias").innerHTML =
+        users.map(u => `
+
+        <div class="d-flex align-items-center justify-content-between mb-3">
+
+            <div class="d-flex align-items-center gap-2">
+
+                <img
+                    src="https://ui-avatars.com/api/?name=${encodeURIComponent(u.nombre)}&background=random"
+                    class="rounded-circle"
+                    width="32"
+                    height="32"
+                >
+
+                <div>
+
+                    <div class="fw-bold" style="font-size: 12px;">
+                        ${u.nombre}
+                    </div>
+
+                    <div class="text-muted" style="font-size: 9px;">
+                        ${getInst(u.email)}
+                    </div>
+
+                </div>
+
+            </div>
+
+            <button
+                class="btn btn-sm text-gold fw-bold p-0"
+                style="font-size:11px;"
+            >
+                Seguir
+            </button>
+
+        </div>
+
+        `).join('');
+
+}
+
+// ─────────────────────────────────────────────
+// BUSCADOR
+// ─────────────────────────────────────────────
+
+function setupSearch() {
+
+    document.getElementById('inputBusqueda').oninput =
+        async (e) => {
+
+            const q = e.target.value.trim();
+
+            const res =
+                document.getElementById('resultadosBusqueda');
+
+            if (q.length < 2) {
+
+                res.innerHTML = "";
+
+                return;
+            }
+
+            const { data } =
+                await window.supabaseClient
+                    .from('usuarios')
+                    .select('id,nombre')
+                    .ilike('nombre', `%${q}%`)
+                    .limit(5);
+
+            res.innerHTML = data.map(u => `
+
+            <div
+                class="p-2 border-bottom border-secondary text-white small"
+                style="cursor:pointer;"
+                onclick="location.href='perfil.html?id=${u.id}'"
+            >
+                ${u.nombre}
+            </div>
+
+            `).join('');
+
+        };
+
+}
 
 })();
+
 </script>
+
+<!-- MODAL EDITAR -->
+
+<div
+class="modal fade"
+id="editPostModal"
+tabindex="-1"
+>
+
+<div class="modal-dialog modal-dialog-centered">
+
+<div
+class="modal-content"
+style="
+background: var(--surface);
+border:1px solid var(--border);
+border-radius:18px;
+"
+>
+
+<div class="modal-header border-0">
+
+<h5 class="modal-title">
+Editar publicación
+</h5>
+
+<button
+type="button"
+class="btn-close btn-close-white"
+data-bs-dismiss="modal"
+></button>
+
+</div>
+
+<div class="modal-body">
+
+<textarea
+id="editPostText"
+class="form-control bg-dark border-0 text-white mb-3"
+rows="4"
+style="resize:none;"
+></textarea>
+
+<div id="editPreview"></div>
+
+<div class="d-flex gap-2 mt-3">
+
+<label
+for="editFile"
+class="btn btn-sm btn-outline-light"
+>
+Cambiar archivo
+</label>
+
+<input
+type="file"
+id="editFile"
+hidden
+accept="image/*,video/*"
+>
+
+<button
+id="btnRemoveCurrentMedia"
+class="btn btn-sm btn-outline-danger"
+>
+Quitar archivo
+</button>
+
+</div>
+
+</div>
+
+<div class="modal-footer border-0">
+
+<button
+class="btn btn-secondary"
+data-bs-dismiss="modal"
+>
+Cancelar
+</button>
+
+<button
+id="btnSaveEdit"
+class="btn btn-warning fw-bold"
+>
+Guardar cambios
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
 </body>
 </html>
