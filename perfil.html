@@ -688,9 +688,11 @@
     document.getElementById('display-nombre').textContent = s.nombre || '—';
     document.getElementById('display-email').textContent  = s.email  || '';
 
+    // Bio — campo real en DB es 'descripcion'
     const bioEl = document.getElementById('display-bio');
-    if (s.descripcion) {
-      bioEl.textContent = s.descripcion;
+    const bioVal = s.descripcion || s.bio || '';
+    if (bioVal) {
+      bioEl.textContent = bioVal;
       bioEl.classList.remove('empty');
     } else {
       bioEl.textContent = 'Sin biografía aún.';
@@ -705,9 +707,12 @@
     }
 
     // Pre-llenar formulario de edición
-    document.getElementById('edit-nombre').value = s.nombre || '';
-    document.getElementById('edit-correo').value = s.email  || '';
-    document.getElementById('edit-bio').value    = s.descripcion    || '';
+    document.getElementById('edit-nombre').value = s.nombre       || '';
+    document.getElementById('edit-correo').value = s.email        || '';
+    document.getElementById('edit-bio').value    = s.descripcion  || s.bio || '';
+
+    // Siempre poblar detalles académicos también
+    poblarDetalles(s);
   }
 
   poblarPerfil(sesion);
@@ -786,6 +791,22 @@
     }
   }
 
+  // Iconos por tipo de dispositivo/navegador
+  function iconoDispositivo(s) {
+    const d = (s.dispositivo || '').toLowerCase();
+    if (d.includes('móvil') || d.includes('movil') || d.includes('iphone') || d.includes('android')) return '📱';
+    if (d.includes('tablet') || d.includes('ipad')) return '📟';
+    return '🖥️';
+  }
+  function iconoNavegador(s) {
+    const n = (s.navegador || '').toLowerCase();
+    if (n.includes('chrome'))  return 'Chrome';
+    if (n.includes('firefox')) return 'Firefox';
+    if (n.includes('safari'))  return 'Safari';
+    if (n.includes('edge'))    return 'Edge';
+    return s.navegador || 'Navegador';
+  }
+
   function renderSesiones(sesiones) {
     const lista = document.getElementById('sesiones-lista');
     if (!sesiones.length) {
@@ -798,15 +819,18 @@
         ? new Date(s.fecha).toLocaleString('es-MX', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' })
         : '—';
       const esActual = s.actual || idx === 0;
+      const icono    = iconoDispositivo(s);
+      const nav      = iconoNavegador(s);
+      const plat     = s.plataforma ? ` · ${s.plataforma}` : '';
       return `
         <div class="sesion-item" id="sesion-item-${idx}">
           <div class="sesion-dot ${esActual ? '' : 'inactiva'}"></div>
           <div class="sesion-info">
             <div class="sesion-nombre">
-              ${s.dispositivo || 'Dispositivo desconocido'}
+              ${icono} ${s.dispositivo || 'Escritorio'} · ${nav}
               ${esActual ? '<span style="color:var(--gold);font-size:10px"> ● Actual</span>' : ''}
             </div>
-            <div class="sesion-meta">${fecha}${s.ip ? ' · ' + s.ip : ''}</div>
+            <div class="sesion-meta">${fecha}${plat}</div>
           </div>
           ${!esActual
             ? `<button class="btn-close-sesion" onclick="cerrarSesion(${idx})">Cerrar</button>`
@@ -873,7 +897,10 @@
       if (error) throw error;
 
       // Actualizar localStorage con datos frescos
+      // data viene de SELECT * así que tiene: numero_cuenta, estado, privacidad, descripcion, etc.
       const sesionActualizada = { ...sesion, ...data };
+      // Actualizar el objeto sesion en memoria para que otras funciones lo usen
+      Object.assign(sesion, sesionActualizada);
       localStorage.setItem('sesion', JSON.stringify(sesionActualizada));
       poblarPerfil(sesionActualizada);
     } catch (err) {
@@ -1012,7 +1039,7 @@
 
     try {
       // Actualizar en Supabase
-      const updates = { nombre, email: correo, descripcion: bio };
+      const updates = { nombre, email: correo, bio };
       if (pass) updates.password = pass; // solo si cambió
 
       const { error } = await window.supabaseClient
