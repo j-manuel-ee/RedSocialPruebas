@@ -58,8 +58,6 @@
               <p class="small">Patrimonio Cultural de la Humanidad</p>
             </div>
           </div>
-
-          <!-- FES (Todas) -->
           <div class="carousel-item h-100" data-bs-interval="2500">
             <img src="images/fes_aragon.jpg" class="d-block" alt="FES Aragón">
             <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-75 rounded"><h5>FES Aragón</h5></div>
@@ -80,8 +78,6 @@
             <img src="images/fes_zaragoza.jpg" class="d-block" alt="FES Zaragoza">
             <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-75 rounded"><h5>FES Zaragoza</h5></div>
           </div>
-
-          <!-- ENES (Todas) -->
           <div class="carousel-item h-100" data-bs-interval="2500">
             <img src="images/enes_morelia.jpg" class="d-block" alt="ENES Morelia">
             <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-75 rounded"><h5>ENES Morelia</h5></div>
@@ -152,70 +148,115 @@ const btnTogglePassword = document.getElementById("btnTogglePassword");
 const passwordEl = document.getElementById("password");
 const iconEye = document.getElementById("iconEye");
 
-// Lógica Ver/Ocultar
+// Ver/Ocultar contraseña
 btnTogglePassword.addEventListener("click", () => {
-    const isPassword = passwordEl.type === "password";
-    passwordEl.type = isPassword ? "text" : "password";
-    iconEye.classList.toggle("bi-eye");
-    iconEye.classList.toggle("bi-eye-slash");
+  const isPassword = passwordEl.type === "password";
+  passwordEl.type = isPassword ? "text" : "password";
+  iconEye.classList.toggle("bi-eye");
+  iconEye.classList.toggle("bi-eye-slash");
 });
 
-// Login con Supabase Auth
+// ── Helper: detectar navegador ────────────────────────────────────────────────
+function detectarNavegador() {
+  const ua = navigator.userAgent;
+  if (ua.includes('Chrome') && !ua.includes('Edg')) return 'Chrome';
+  if (ua.includes('Firefox')) return 'Firefox';
+  if (ua.includes('Safari') && !ua.includes('Chrome')) return 'Safari';
+  if (ua.includes('Edg')) return 'Edge';
+  return 'Navegador';
+}
+
+function detectarDispositivo() {
+  const ua = navigator.userAgent;
+  if (/Android|iPhone|iPad|iPod/i.test(ua)) return 'Móvil';
+  if (/Tablet/i.test(ua)) return 'Tablet';
+  return 'Escritorio';
+}
+
+// ── LOGIN ─────────────────────────────────────────────────────────────────────
 form.addEventListener("submit", async function(e) {
   e.preventDefault();
-  const inputEl = document.getElementById("email");
-  const inputVal = inputEl.value.trim();
-  const passwordVal = passwordEl.value;
+  const inputEl   = document.getElementById("email");
+  const inputVal  = inputEl.value.trim();
+  const passVal   = passwordEl.value;
+  const btnSubmit = form.querySelector('button[type="submit"]');
 
   mensaje.innerHTML = "";
   [inputEl, passwordEl].forEach(i => i.classList.remove("is-invalid"));
+  btnSubmit.disabled = true;
+  btnSubmit.textContent = "Verificando...";
 
   try {
     let emailParaAuth = inputVal;
 
-    // Si el usuario ingresó número de cuenta (9 dígitos), buscamos su correo
+    // Si ingresó número de cuenta (9 dígitos) → buscar correo
     if (/^\d{9}$/.test(inputVal)) {
       const { data: usuario, error: errBusqueda } = await window.supabaseClient
         .from('usuarios')
         .select('email')
         .eq('numero_cuenta', inputVal)
         .single();
-
       if (errBusqueda || !usuario) throw new Error("Número de cuenta no registrado.");
       emailParaAuth = usuario.email;
     }
 
-    // Intento de login real en Supabase Auth
+    // Login en Supabase Auth
     const { data: authData, error: authError } = await window.supabaseClient.auth.signInWithPassword({
       email: emailParaAuth,
-      password: passwordVal
+      password: passVal
     });
-
     if (authError) throw new Error("Correo o contraseña incorrectos.");
 
-    // Traemos los datos extra del perfil para el localStorage
+    // Traer perfil completo
     const { data: perfil, error: perfilError } = await window.supabaseClient
       .from('usuarios')
       .select('*')
       .eq('id', authData.user.id)
       .single();
-
     if (perfilError) throw perfilError;
 
-    // Guardar sesión local
+    // ── Registrar esta sesión en sesiones_activas ─────────────────────────
+    const nuevaSesion = {
+      dispositivo: detectarDispositivo(),
+      navegador:   detectarNavegador(),
+      plataforma:  navigator.platform || '—',
+      fecha:       new Date().toISOString(),
+      // Usamos los últimos 8 chars del token como identificador ligero
+      token_ref:   authData.session?.access_token?.slice(-8) || Math.random().toString(36).slice(2,10)
+    };
+
+    // Agregar al inicio del array, conservar máximo 5 sesiones
+    const sesionesActuales = Array.isArray(perfil.sesiones_activas) ? perfil.sesiones_activas : [];
+    const sesionesActualizadas = [nuevaSesion, ...sesionesActuales].slice(0, 5);
+
+    await window.supabaseClient
+      .from('usuarios')
+      .update({ sesiones_activas: sesionesActualizadas })
+      .eq('id', perfil.id);
+
+    // ── Guardar sesión local COMPLETA ─────────────────────────────────────
+    // Incluimos todos los campos que necesita perfil.html inmediatamente
     localStorage.setItem("sesion", JSON.stringify({
-      id: perfil.id,
-      nombre: perfil.nombre,
-      email: perfil.email,
-      cuenta: perfil.numero_cuenta
+      id:             perfil.id,
+      nombre:         perfil.nombre,
+      email:          perfil.email,
+      numero_cuenta:  perfil.numero_cuenta,
+      descripcion:    perfil.descripcion   || '',
+      foto_perfil:    perfil.foto_perfil   || '',
+      estado:         perfil.estado        || 'Activo',
+      privacidad:     perfil.privacidad    || 'Público',
+      fecha_registro: perfil.fecha_registro || ''
     }));
 
-    mensaje.innerHTML = `<div class="alert alert-success py-2 small">¡Bienvenido, ${perfil.nombre}!</div>`;
-    setTimeout(() => { window.location.href = "inicioRed.html"; }, 1000);
+    mensaje.innerHTML = `<div class="alert alert-success py-2 small">¡Bienvenido, ${perfil.nombre}! 🎓</div>`;
+    setTimeout(() => { window.location.href = "inicioRed.html"; }, 900);
 
   } catch (err) {
     [inputEl, passwordEl].forEach(i => i.classList.add("is-invalid"));
     mensaje.innerHTML = `<div class="alert alert-danger py-2 small">${err.message}</div>`;
+  } finally {
+    btnSubmit.disabled = false;
+    btnSubmit.textContent = "Entrar";
   }
 });
 </script>
