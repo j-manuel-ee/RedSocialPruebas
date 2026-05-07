@@ -642,69 +642,10 @@
 <script>
 (function () {
 
-const sesionData = localStorage.getItem('sesion');
-
-const sessionId = localStorage.getItem('session_id');
-
-if (!sesionData || !sessionId) {
-
-cerrarSesionLocal();
-
-throw new Error("Sin sesión");
-
-}
-
-const sesion = JSON.parse(sesionData);
-
-async function validarSesionActiva() {
-
-try {
-
-const { data, error } = await window.supabaseClient
-.from('usuarios')
-.select('sesiones_activas')
-.eq('id', sesion.id)
-.single();
-
-if (error) throw error;
-
-const sesiones = data?.sesiones_activas || [];
-
-const sigueActiva = sesiones.some(
-s => s.session_id === sessionId
-);
-
-if (!sigueActiva) {
-
-cerrarSesionLocal();
-
-return false;
-
-}
-
-return true;
-
-} catch {
-
-cerrarSesionLocal();
-
-return false;
-
-}
-
-}
-
-function cerrarSesionLocal() {
-
-localStorage.removeItem("sesion");
-
-localStorage.removeItem("session_id");
-
-window.location.replace("index.html");
-
-}
-
-await validarSesionActiva();
+  // ── SESIÓN ────────────────────────────────────────────────────────────────
+  const sesionData = localStorage.getItem('sesion');
+  if (!sesionData) { window.location.replace('index.html'); return; }
+  const sesion = JSON.parse(sesionData);
 
   // ── BUCKET (mismo que paginaprincipal) ────────────────────────────────────
   const BUCKET = 'publicaciones-media';
