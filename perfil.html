@@ -1012,7 +1012,7 @@
 
     try {
       // Actualizar en Supabase
-      const updates = { nombre, email: correo, bio };
+      const updates = { nombre, email: correo, descripcion: bio };
       if (pass) updates.password = pass; // solo si cambió
 
       const { error } = await window.supabaseClient
