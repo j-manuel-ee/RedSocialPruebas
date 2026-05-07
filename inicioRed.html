@@ -3,127 +3,209 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Red UNAM - Inicio</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <title>Red UNAM - Comunidad Universitaria</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
   <style>
-    body { background-color: #121212; }
-    .nav-link#facultadNav { color: #ffc107 !important; font-weight: bold; }
-    .auth-vacia { visibility: hidden; }
-    .sticky-col { position: sticky; top: 80px; height: calc(100vh - 100px); overflow-y: auto; }
-    .card-social { border-radius: 12px; border: none; background-color: #1e1e1e; margin-bottom: 20px; }
-    .user-status { width: 10px; height: 10px; border-radius: 50%; display: inline-block; background-color: #28a745; margin-right: 8px; }
-    .sticky-col::-webkit-scrollbar { display: none; }
-    .search-results {
-      position: absolute; top: 100%; left: 0; right: 0;
-      background: #252525; z-index: 1050; border-radius: 0 0 10px 10px;
-      max-height: 250px; overflow-y: auto; border: 1px solid #333;
+    :root {
+      --bg: #0a0c10;
+      --surface: #111318;
+      --surface2: #181c24;
+      --border: rgba(255,255,255,0.07);
+      --accent: #002f6c;
+      --gold: #c8a951;
+      --text: #e8eaf0;
+      --muted: #6b7280;
+      --danger: #e05252;
+      --radius: 14px;
     }
-    .post-media { width: 100%; border-radius: 8px; margin-top: 10px; max-height: 400px; object-fit: cover; }
-    .btn-interaction { color: #aaa; transition: 0.3s; font-size: 0.9rem; border: none; background: transparent; }
-    .btn-interaction:hover { color: #0d6efd; }
+
+    body {
+      font-family: 'Sora', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      background-image: radial-gradient(ellipse 80% 60% at 50% -10%, rgba(0,47,108,0.35) 0%, transparent 70%);
+      min-height: 100vh;
+    }
+
+    /* --- NAVIGATION --- */
+    .header-main {
+      position: sticky;
+      top: 0;
+      z-index: 1050;
+      background: rgba(10,12,16,0.85);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo-mark {
+      width: 34px; height: 34px;
+      background: linear-gradient(135deg, var(--accent), #0047ab);
+      border-radius: 8px;
+      display: grid; place-items: center;
+      font-family: 'DM Serif Display', serif;
+      color: var(--gold);
+      box-shadow: 0 0 18px rgba(0,47,108,0.6);
+      text-decoration: none;
+    }
+
+    .search-container {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 6px 14px;
+      max-width: 320px;
+      transition: 0.2s;
+    }
+    .search-container:focus-within { border-color: var(--gold); }
+    
+    .search-results {
+      position: absolute; top: 110%; left: 0; right: 0;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      z-index: 1000;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    /* --- LAYOUT --- */
+    .sticky-sidebar { position: sticky; top: 90px; height: calc(100vh - 110px); overflow-y: auto; }
+    .sticky-sidebar::-webkit-scrollbar { display: none; }
+
+    /* --- CARDS & POSTS --- */
+    .custom-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+    }
+
+    .post-media { width: 100%; border-radius: 10px; margin-top: 12px; border: 1px solid var(--border); }
+    
+    .btn-interaction {
+      background: none; border: none; color: var(--muted);
+      font-size: 0.9rem; transition: 0.2s;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .btn-interaction:hover { color: var(--gold); }
+    .btn-interaction.active { color: var(--danger); }
+
+    .nav-link-custom {
+      color: var(--muted); font-weight: 600; font-size: 14px;
+      transition: 0.2s; border-bottom: 2px solid transparent;
+    }
+    .nav-link-custom:hover, .nav-link-custom.active { color: var(--gold); border-bottom-color: var(--gold); }
+
+    .official-badge {
+      background: var(--gold); color: #000;
+      border-radius: 50%; padding: 2px; font-size: 8px; margin-left: 5px;
+    }
+
+    .comment-box { background: var(--surface2); border-radius: 8px; padding: 10px; margin-top: 10px; }
   </style>
 </head>
 <body>
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow sticky-top">
-  <div class="container-fluid">
-    <a class="navbar-brand d-flex align-items-center" href="inicioRed.html">
-      <img src="images/logoUNAM.png" width="40" class="me-2">
-      <strong class="d-none d-sm-block">Red UNAM</strong>
-    </a>
+<header class="header-main">
+  <div class="container-fluid px-lg-5">
+    <div class="d-flex align-items-center justify-content-between py-2">
+      <a href="inicioRed.html" class="d-flex align-items-center gap-2 text-decoration-none">
+        <div class="logo-mark">U</div>
+        <span class="fw-bold d-none d-sm-inline" style="letter-spacing: 1px; color: var(--text)">RED UNAM</span>
+      </a>
 
-    <div class="flex-grow-1 mx-3 position-relative" style="max-width: 400px;">
-      <div class="input-group input-group-sm">
-        <span class="input-group-text bg-dark border-0 text-white"><i class="bi bi-search"></i></span>
-        <input type="text" id="inputBusqueda" class="form-control bg-dark border-0 text-white" placeholder="Buscar en la UNAM...">
+      <div class="position-relative flex-grow-1 mx-4" style="max-width: 400px;">
+        <div class="search-container d-flex align-items-center">
+          <i class="bi bi-search text-muted me-2"></i>
+          <input type="text" id="inputBusqueda" class="form-control bg-transparent border-0 text-white p-0 shadow-none" placeholder="Buscar compañeros..." style="font-size: 14px;">
+        </div>
+        <div id="resultadosBusqueda" class="search-results shadow-lg"></div>
       </div>
-      <div id="resultadosBusqueda" class="search-results shadow"></div>
-    </div>
 
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    
-    <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav me-auto align-items-center">
-        <li class="nav-item"><a class="nav-link active" href="inicioRed.html">Inicio</a></li>
-        <li class="nav-item"><a class="nav-link" href="amigos.html"><i class="bi bi-people-fill"></i></a></li>
-        <li class="nav-item dropdown">
-          <a class="nav-link position-relative" href="notificaciones.html" id="notifDrop" data-bs-toggle="dropdown">
-            <i class="bi bi-bell-fill"></i>
-            <span id="badge-notificaciones" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none">0</span>
+      <div class="d-flex align-items-center gap-3">
+        <div class="dropdown">
+          <a href="notificaciones.html" class="text-white position-relative fs-5" data-bs-toggle="dropdown">
+            <i class="bi bi-bell"></i>
+            <span id="badge-notificaciones" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none" style="font-size: 10px;">0</span>
           </a>
-          <ul id="lista-notificaciones" class="dropdown-menu dropdown-menu-end shadow p-2" style="width: 280px; max-height: 400px; overflow-y: auto;">
-            <li class="text-center small text-muted">Cargando...</li>
+          <ul id="lista-notificaciones" class="dropdown-menu dropdown-menu-end shadow-lg p-2 mt-3" style="width: 300px; background: var(--surface2); border: 1px solid var(--border);">
+            <li class="text-center small text-muted p-3">Cargando...</li>
           </ul>
-        </li>
-        <li class="nav-item"><a class="nav-link auth-vacia" href="facultad.html" id="facultadNav"></a></li>
-      </ul>
-      <div id="authArea" class="auth-vacia"></div>
-    </div>
-  </div>
-</nav>
+        </div>
 
-<div class="container-fluid mt-4 px-lg-5">
+        <div id="authArea"></div>
+      </div>
+    </div>
+    
+    <nav class="d-flex gap-4 pb-1">
+      <a href="#" class="nav-link-custom active py-2">Inicio</a>
+      <a href="amigos.html" class="nav-link-custom py-2">Explorar</a>
+      <a href="#" id="btnFacultad" class="nav-link-custom py-2 text-warning">🎓 Mi Facultad</a>
+    </nav>
+  </div>
+</header>
+
+<main class="container-fluid px-lg-5 mt-4">
   <div class="row">
     <div class="col-lg-3 d-none d-lg-block">
-      <div class="sticky-col">
-        <h6 class="text-muted text-uppercase fw-bold mb-3 small">Sugerencias UNAM</h6>
-        <div id="listaContactos" class="list-group list-group-flush shadow-sm rounded">
-          <div class="text-center p-3 small text-muted">Buscando compañeros...</div>
+      <div class="sticky-sidebar">
+        <h6 class="text-muted text-uppercase fw-bold mb-4 small" style="letter-spacing: 1px;">Sugerencias UNAM</h6>
+        <div id="listaSugerencias">
+            <div class="text-center p-3 small text-muted">Buscando comunidad...</div>
         </div>
       </div>
     </div>
 
-    <div class="col-lg-6 col-md-12">
-      <div class="card card-social shadow-sm p-3 mb-4">
-        <div class="d-flex">
-          <img id="userImgPost" src="" class="rounded-circle me-2" width="40">
-          <button class="btn btn-dark w-100 text-start text-muted rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#modalPost">
-            ¿Qué quieres compartir hoy, <span id="userNameShort"></span>?
+    <div class="col-lg-6">
+      <div class="custom-card">
+        <h3 class="font-serif mb-3" style="font-family: 'DM Serif Display', serif; font-size: 1.2rem;">¿Qué quieres <span style="color: var(--gold);">compartir</span>?</h3>
+        <textarea id="postContent" class="form-control bg-dark border-0 text-white mb-3" rows="3" placeholder="Escribe algo para la comunidad..." style="border-radius: 12px; resize: none;"></textarea>
+        
+        <div id="filePreview" class="mb-3 text-center"></div>
+
+        <div class="d-flex justify-content-between align-items-center">
+          <label for="postFile" class="btn btn-sm btn-outline-secondary border-0" style="cursor:pointer">
+            <i class="bi bi-camera-fill me-1"></i> Foto/Video
+            <input type="file" id="postFile" hidden accept="image/*,video/*">
+          </label>
+          <button id="btnPublicar" class="btn btn-primary px-4 fw-bold" style="background: linear-gradient(135deg, var(--accent), #0047ab); border: none; border-radius: 8px;">
+            Publicar
           </button>
         </div>
       </div>
+
+      <div class="d-flex align-items-center gap-3 my-4">
+        <hr class="flex-grow-1 opacity-10">
+        <span class="text-muted small fw-bold text-uppercase" style="letter-spacing: 2px; font-size: 10px;">Recientes</span>
+        <hr class="flex-grow-1 opacity-10">
+      </div>
+
       <div id="feedPublicaciones">
-        <div class="text-center p-5"><div class="spinner-border text-primary"></div></div>
+        <div class="text-center p-5"><div class="spinner-border text-gold" style="color: var(--gold);"></div></div>
       </div>
     </div>
 
     <div class="col-lg-3 d-none d-lg-block">
-      <div class="sticky-col">
-        <h6 class="text-muted text-uppercase fw-bold mb-3 small">Mensajes Directos</h6>
-        <div class="card card-social border-0 shadow-sm p-3 text-center">
-             <p class="small text-muted">Próximamente: Chat Universitario</p>
-             <i class="bi bi-chat-dots text-primary fs-2"></i>
+        <div class="sticky-sidebar">
+          <div class="custom-card text-center">
+            <h6 class="text-muted small fw-bold mb-3">MENSAJES DIRECTOS</h6>
+            <i class="bi bi-chat-heart text-gold mb-2 d-block" style="font-size: 2rem; color: var(--gold);"></i>
+            <p class="small text-muted">Próximamente: Chat Universitario en tiempo real.</p>
+          </div>
+          <div id="climaOInfo" class="mt-3 p-2 small text-muted text-center">
+            © 2026 Red UNAM - Hecho con ❤️ por Ingeniería
+          </div>
         </div>
-      </div>
     </div>
   </div>
-</div>
-
-<div class="modal fade" id="modalPost" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content bg-dark border-secondary text-white">
-      <div class="modal-header border-secondary">
-        <h5 class="modal-title">Nueva publicación</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body">
-        <textarea id="postContent" class="form-control bg-transparent text-white border-0 mb-3" rows="4" placeholder="¿Qué está pasando en tu facultad?"></textarea>
-        <div class="d-flex align-items-center justify-content-between p-2 border border-secondary rounded">
-          <small class="text-muted">Añadir multimedia:</small>
-          <label for="postFile" class="btn btn-outline-primary btn-sm"><i class="bi bi-camera-fill"></i> Foto/Video</label>
-          <input type="file" id="postFile" hidden accept="image/*,video/*">
-        </div>
-        <div id="filePreview" class="mt-2 text-center small text-info"></div>
-      </div>
-      <div class="modal-footer border-secondary">
-        <button type="button" class="btn btn-primary w-100 fw-bold" id="btnPublicar">Publicar en Red UNAM</button>
-      </div>
-    </div>
-  </div>
-</div>
+</main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/conexion.js"></script>
@@ -132,168 +214,177 @@
 <script>
   (function() {
     const sesion = JSON.parse(localStorage.getItem("sesion"));
+    const BUCKET = 'publicaciones-media';
 
-    // --- 🛠 LÓGICA DE INSTITUCIÓN ---
-    function obtenerInstitucion(email) {
-        if (!email) return "Comunidad UNAM";
-        if (email.endsWith('@aragon.unam.mx')) return "FES Aragón";
-        if (email.endsWith('@ingenieria.unam.mx')) return "Facultad de Ingeniería";
-        if (email.endsWith('@comunidad.unam.mx')) return "UNAM Central";
+    if (!sesion) { window.location.replace("index.html"); return; }
+
+    // --- UTILIDADES ---
+    const getInst = (email) => {
+        if (email?.endsWith('@aragon.unam.mx')) return "FES Aragón";
+        if (email?.endsWith('@ingenieria.unam.mx')) return "Facultad de Ingeniería";
         return "Comunidad UNAM";
-    }
+    };
 
-    // --- 🌍 FUNCIONES GLOBALES ---
-    window.marcarLeidas = async () => {
-        await window.supabaseClient.from('notificaciones').update({ leida: true }).eq('usuario_id', sesion.id);
+    // --- NÚCLEO DE CARGA ---
+    async function init() {
+        renderUserHeader();
+        cargarPublicaciones();
         cargarNotificaciones();
-    };
-
-    window.gestionarLike = async (postId, currentLikes, autorId) => {
-        const { data: existe } = await window.supabaseClient.from('likes_usuarios').select('id').eq('user_id', sesion.id).eq('post_id', postId).maybeSingle();
-        if (existe) {
-            await window.supabaseClient.from('likes_usuarios').delete().eq('id', existe.id);
-            await window.supabaseClient.from('publicaciones').update({ likes_count: Math.max(0, currentLikes - 1) }).eq('id', postId);
-        } else {
-            await window.supabaseClient.from('likes_usuarios').insert([{ user_id: sesion.id, post_id: postId }]);
-            await window.supabaseClient.from('publicaciones').update({ likes_count: currentLikes + 1 }).eq('id', postId);
-            if(autorId !== sesion.id) await window.supabaseClient.from('notificaciones').insert([{ usuario_id: autorId, emisor_nombre: sesion.nombre, tipo: "le dio me gusta a tu post", leida: false }]);
-        }
-        cargarPublicaciones();
-    };
-
-    window.enviarComentario = async (postId, autorId) => {
-        const input = document.getElementById(`input-comentario-${postId}`);
-        const texto = input.value.trim();
-        if (!texto) return;
-        await window.supabaseClient.from('comentarios').insert([{ publicacion_id: postId, autor_id: sesion.id, autor_comentario_nombre: sesion.nombre, contenido_comentario: texto }]);
-        if(autorId !== sesion.id) await window.supabaseClient.from('notificaciones').insert([{ usuario_id: autorId, emisor_nombre: sesion.nombre, tipo: "comentó tu post", leida: false }]);
-        input.value = "";
-        cargarPublicaciones();
-    };
-
-    // --- 📦 CARGA DE DATOS ---
-    async function cargarNotificaciones() {
-        const { data: notifs } = await window.supabaseClient.from('notificaciones').select('*').eq('usuario_id', sesion.id).order('creado_a_las', { ascending: false }).limit(10);
-        const badge = document.getElementById("badge-notificaciones");
-        const lista = document.getElementById("lista-notificaciones");
-        const noLeidas = notifs?.filter(n => !n.leida).length || 0;
-        badge.innerText = noLeidas;
-        noLeidas > 0 ? badge.classList.remove("d-none") : badge.classList.add("d-none");
-        lista.innerHTML = notifs?.length ? notifs.map(n => `<li class="p-2 border-bottom border-secondary small ${n.leida ? '' : 'bg-dark'}"><b>${n.emisor_nombre}</b> ${n.tipo}</li>`).join('') + `<li><button class="btn btn-link btn-sm w-100" onclick="marcarLeidas()">Marcar todo como leído</button></li>` : '<li class="text-center p-2 small">Sin notificaciones</li>';
+        cargarSugerencias();
+        setupSearch();
     }
 
+    function renderUserHeader() {
+        const avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(sesion.nombre)}&background=c8a951&color=000&bold=true`;
+        document.getElementById("authArea").innerHTML = `
+            <div class="dropdown">
+                <div class="d-flex align-items-center gap-2 cursor-pointer" data-bs-toggle="dropdown">
+                    <span class="small fw-bold d-none d-md-block">${sesion.nombre.split(' ')[0]}</span>
+                    <img src="${avatar}" class="rounded-circle border border-warning" width="35" height="35">
+                </div>
+                <ul class="dropdown-menu dropdown-menu-end shadow-lg mt-2" style="background: var(--surface2); border: 1px solid var(--border);">
+                    <li class="p-3 text-center">
+                        <img src="${avatar}" class="rounded-circle mb-2" width="50">
+                        <div class="fw-bold text-white small">${sesion.nombre}</div>
+                        <div class="text-gold" style="font-size: 10px; color: var(--gold)">${getInst(sesion.email)}</div>
+                    </li>
+                    <li><hr class="dropdown-divider opacity-10"></li>
+                    <li><a class="dropdown-item small" href="perfil.html">Ver Perfil</a></li>
+                    <li><button class="dropdown-item small text-danger" onclick="logout()">Cerrar Sesión</button></li>
+                </ul>
+            </div>`;
+        document.getElementById("btnFacultad").innerText = `🎓 ${getInst(sesion.email)}`;
+    }
+
+    // --- FUNCIONALIDADES DE POSTS ---
     async function cargarPublicaciones() {
-        const { data: posts } = await window.supabaseClient.from('publicaciones').select('*, comentarios(*)').order('creado_a_las', { ascending: false });
+        const { data: posts, error } = await window.supabaseClient.from('publicaciones').select('*, comentarios(*)').order('creado_a_las', { ascending: false });
         const feed = document.getElementById("feedPublicaciones");
+        if (error) return;
+
         feed.innerHTML = posts.map(p => {
-            let media = p.archivo_url ? (p.tipo_archivo?.includes('video') ? `<video src="${p.archivo_url}" controls class="post-media"></video>` : `<img src="${p.archivo_url}" class="post-media">`) : "";
-            const coms = (p.comentarios || []).map(c => `<div class="p-2 mb-1 bg-dark rounded small"><b class="text-info">${c.autor_comentario_nombre}:</b> ${c.contenido_comentario}</div>`).join('');
+            const esMio = p.autor_id === sesion.id;
+            const media = p.archivo_url ? (p.tipo_archivo?.includes('video') ? `<video src="${p.archivo_url}" controls class="post-media"></video>` : `<img src="${p.archivo_url}" class="post-media">`) : "";
+            const fecha = new Date(p.creado_a_las).toLocaleString();
+            
             return `
-                <div class="card card-social p-3">
-                    <div class="d-flex align-items-center mb-3 cursor-pointer" onclick="location.href='perfil.html?id=${p.autor_id}'">
-                        <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(p.autor_nombre)}&background=random" class="rounded-circle me-2" width="40">
-                        <div>
-                            <h6 class="mb-0 fw-bold text-white">${p.autor_nombre}</h6>
-                            <small class="text-muted small">${new Date(p.creado_a_las).toLocaleString()}</small>
+                <div class="custom-card shadow-sm">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div class="d-flex align-items-center gap-2 cursor-pointer" onclick="location.href='perfil.html?id=${p.autor_id}'">
+                            <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(p.autor_nombre)}&background=random" class="rounded-circle" width="38">
+                            <div>
+                                <h6 class="mb-0 fw-bold small">${p.autor_nombre} ${p.autor_id === 'oficial' ? '<i class="bi bi-patch-check-fill text-info"></i>' : ''}</h6>
+                                <small class="text-muted" style="font-size: 10px;">${fecha}</small>
+                            </div>
                         </div>
+                        ${esMio ? `<button class="btn btn-link text-danger btn-sm p-0" onclick="eliminarPost(${p.id})"><i class="bi bi-trash"></i></button>` : ''}
                     </div>
-                    <p class="text-white mb-2">${p.contenido_texto}</p>
+                    <p class="small mb-2" style="line-height: 1.6;">${p.contenido_texto}</p>
                     ${media}
-                    <div class="d-flex mt-3 border-top border-secondary pt-2">
-                        <button class="btn-interaction me-3" onclick="gestionarLike(${p.id}, ${p.likes_count || 0}, '${p.autor_id}')"><i class="bi bi-heart-fill text-danger"></i> ${p.likes_count || 0}</button>
-                        <button class="btn-interaction" onclick="document.getElementById('caja-${p.id}').classList.toggle('d-none')"><i class="bi bi-chat"></i> Comentar</button>
+                    <div class="d-flex gap-4 mt-3 pt-2 border-top border-secondary opacity-50">
+                        <button class="btn-interaction" onclick="toggleLike(${p.id}, ${p.likes_count || 0}, '${p.autor_id}')">
+                            <i class="bi bi-heart"></i> ${p.likes_count || 0}
+                        </button>
+                        <button class="btn-interaction" onclick="toggleComments(${p.id})">
+                            <i class="bi bi-chat"></i> Comentar
+                        </button>
                     </div>
-                    <div id="caja-${p.id}" class="mt-3 d-none">
-                        <div class="mb-2">${coms}</div>
+                    <div id="caja-${p.id}" class="d-none mt-3">
+                        <div class="comments-list mb-2">
+                            ${(p.comentarios || []).map(c => `
+                                <div class="comment-box small">
+                                    <b class="text-gold" style="color: var(--gold)">${c.autor_comentario_nombre}:</b> ${c.contenido_comentario}
+                                </div>
+                            `).join('')}
+                        </div>
                         <div class="input-group input-group-sm">
-                            <input type="text" id="input-comentario-${p.id}" class="form-control bg-dark text-white border-secondary" placeholder="Escribe un comentario...">
-                            <button class="btn btn-primary" onclick="enviarComentario(${p.id}, '${p.autor_id}')">Publicar</button>
+                            <input type="text" id="in-${p.id}" class="form-control bg-dark border-0 text-white" placeholder="Escribe un comentario...">
+                            <button class="btn btn-gold btn-sm" onclick="sendComment(${p.id}, '${p.autor_id}')" style="background: var(--gold); color: black;">Enviar</button>
                         </div>
                     </div>
                 </div>`;
         }).join('');
     }
 
-    async function cargarSugerencias() {
-        const { data: users } = await window.supabaseClient.from('usuarios').select('id, nombre, email').neq('id', sesion.id).limit(6);
-        const lista = document.getElementById("listaContactos");
-        lista.innerHTML = users.map(u => `
-            <div class="list-group-item bg-transparent border-0 d-flex align-items-center px-0 mb-3">
-                <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(u.nombre)}&background=random" class="rounded-circle me-2" width="35" onclick="location.href='perfil.html?id=${u.id}'" style="cursor:pointer">
-                <div>
-                    <span class="d-block small fw-bold text-white">${u.nombre}</span>
-                    <small class="text-muted d-block" style="font-size: 0.65rem;">${obtenerInstitucion(u.email)}</small>
-                    <button class="btn text-primary p-0 small" style="font-size: 0.7rem;" onclick="window.supabaseClient.from('notificaciones').insert([{usuario_id:'${u.id}', emisor_nombre:'${sesion.nombre}', tipo:'te envió una solicitud', leida:false}]); alert('Solicitud enviada');">Agregar</button>
-                </div>
-            </div>`).join('');
-    }
-
-    // --- 🚀 INICIALIZACIÓN ---
-    function cargarInterfaz() {
-      if (!sesion) { window.location.replace("index.html"); return; }
-      
-      const miInst = obtenerInstitucion(sesion.email);
-      const avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(sesion.nombre)}&background=0D6EFD&color=fff`;
-      
-      document.getElementById("userImgPost").src = avatar;
-      document.getElementById("userNameShort").innerText = sesion.nombre.split(' ')[0];
-      
-      // Navbar Facultad
-      const fNav = document.getElementById("facultadNav");
-      fNav.innerHTML = `🎓 ${miInst}`;
-      fNav.classList.remove("auth-vacia");
-
-      // Dropdown Usuario
-      const authArea = document.getElementById("authArea");
-      authArea.innerHTML = `
-        <div class="dropdown">
-          <button class="btn btn-light btn-sm dropdown-toggle fw-bold" data-bs-toggle="dropdown">
-            ${sesion.nombre.split(' ')[0]}
-          </button>
-          <ul class="dropdown-menu dropdown-menu-end shadow p-3">
-            <li class="text-center mb-2">
-              <img src="${avatar}" class="rounded-circle mb-2" width="55">
-              <div class="fw-bold text-primary small">${sesion.nombre}</div>
-              <div class="text-muted" style="font-size: 0.7rem;">${miInst}</div>
-            </li>
-            <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item text-center fw-bold border rounded mb-2" href="perfil.html">Ver Perfil</a></li>
-            <li><button class="dropdown-item text-danger text-center fw-bold" onclick="localStorage.removeItem('sesion'); location.href='index.html'">Cerrar sesión</button></li>
-          </ul>
-        </div>`;
-      authArea.classList.remove("auth-vacia");
-
-      // Buscador
-      document.getElementById('inputBusqueda').addEventListener('input', async (e) => {
-          const q = e.target.value.trim();
-          const res = document.getElementById('resultadosBusqueda');
-          if (q.length < 2) { res.innerHTML = ""; return; }
-          const { data } = await window.supabaseClient.from('usuarios').select('id, nombre').ilike('nombre', `%${q}%`).limit(5);
-          res.innerHTML = data.map(u => `<div class="p-2 border-bottom border-secondary text-white small cursor-pointer" onclick="location.href='perfil.html?id=${u.id}'">${u.nombre}</div>`).join('');
-      });
-
-      cargarPublicaciones();
-      cargarNotificaciones();
-      cargarSugerencias();
-    }
-
+    // --- EVENTOS ---
     document.getElementById("btnPublicar").onclick = async () => {
-        const txt = document.getElementById("postContent").value;
+        const btn = document.getElementById("btnPublicar");
+        const txt = document.getElementById("postContent").value.trim();
         const file = document.getElementById("postFile").files[0];
-        if (!txt.trim() && !file) return;
-        document.getElementById("btnPublicar").disabled = true;
+        
+        if (!txt && !file) return;
+        
+        btn.disabled = true;
+        btn.innerText = "...";
+
         let url = null, type = null;
         if (file) {
             const path = `posts/${Date.now()}_${file.name}`;
-            await window.supabaseClient.storage.from('multimedia').upload(path, file);
-            url = window.supabaseClient.storage.from('multimedia').getPublicUrl(path).data.publicUrl;
+            await window.supabaseClient.storage.from(BUCKET).upload(path, file);
+            url = window.supabaseClient.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
             type = file.type;
         }
-        await window.supabaseClient.from('publicaciones').insert([{ autor_id: sesion.id, autor_nombre: sesion.nombre, contenido_texto: txt, archivo_url: url, tipo_archivo: type }]);
+
+        await window.supabaseClient.from('publicaciones').insert([{ 
+            autor_id: sesion.id, 
+            autor_nombre: sesion.nombre, 
+            contenido_texto: txt, 
+            archivo_url: url, 
+            tipo_archivo: type 
+        }]);
+
         location.reload();
     };
 
-    cargarInterfaz();
+    window.toggleComments = (id) => document.getElementById(`caja-${id}`).classList.toggle('d-none');
+
+    window.logout = () => {
+        localStorage.removeItem('sesion');
+        location.href = 'index.html';
+    };
+
+    // --- CARGAS SOCIALES ---
+    async function cargarNotificaciones() {
+        const { data: notifs } = await window.supabaseClient.from('notificaciones').select('*').eq('usuario_id', sesion.id).order('creado_a_las', { ascending: false }).limit(8);
+        const badge = document.getElementById("badge-notificaciones");
+        const lista = document.getElementById("lista-notificaciones");
+        
+        const unread = notifs?.filter(n => !n.leida).length || 0;
+        badge.innerText = unread;
+        unread > 0 ? badge.classList.remove("d-none") : badge.classList.add("d-none");
+
+        lista.innerHTML = notifs?.length ? 
+            notifs.map(n => `<li class="p-2 small border-bottom border-secondary ${n.leida ? '' : 'bg-dark'}"><b>${n.emisor_nombre}</b> ${n.tipo}</li>`).join('') + 
+            `<li class="text-center mt-2"><button class="btn btn-link btn-sm text-gold p-0" onclick="markAllRead()">Marcar todo como leído</button></li>` 
+            : '<li class="text-center p-3 small">Sin novedades</li>';
+    }
+
+    async function cargarSugerencias() {
+        const { data: users } = await window.supabaseClient.from('usuarios').select('id, nombre, email').neq('id', sesion.id).limit(5);
+        document.getElementById("listaSugerencias").innerHTML = users.map(u => `
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <div class="d-flex align-items-center gap-2">
+                    <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(u.nombre)}&background=random" class="rounded-circle" width="32">
+                    <div>
+                        <div class="fw-bold" style="font-size: 12px;">${u.nombre}</div>
+                        <div class="text-muted" style="font-size: 9px;">${getInst(u.email)}</div>
+                    </div>
+                </div>
+                <button class="btn btn-sm text-gold fw-bold p-0" style="font-size: 11px;" onclick="addFriend('${u.id}')">Seguir</button>
+            </div>`).join('');
+    }
+
+    function setupSearch() {
+        document.getElementById('inputBusqueda').oninput = async (e) => {
+            const q = e.target.value.trim();
+            const res = document.getElementById('resultadosBusqueda');
+            if (q.length < 2) { res.innerHTML = ""; return; }
+            const { data } = await window.supabaseClient.from('usuarios').select('id, nombre').ilike('nombre', `%${q}%`).limit(5);
+            res.innerHTML = data.map(u => `<div class="p-2 border-bottom border-secondary text-white small cursor-pointer hover-gold" onclick="location.href='perfil.html?id=${u.id}'">${u.nombre}</div>`).join('');
+        };
+    }
+
+    init();
   })();
 </script>
 </body>
